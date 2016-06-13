@@ -19,19 +19,25 @@ Step-through-text-viewer:
 
 -Steps through text x lines at a time (1 by default), displays line number
 jumps to specific lines
+
 -skips to specific instances of a chosen word 
 at/after or at/before current line position (forwards and backwards)
+
 -displays the word instance's position/index in the text,
 displays number of words skipped (forwards or backwards)
+
 -If end of file reached 
 (either through a line skip or through an attempt to step forward after 
 the last instance of a word has already been reached),
 exits (prompts to enter a new word to "track")
+
 -If no instance of the chosen word found before the current line,
 moves directly to the first instance
+
 -possible not to remove extra punctuation (less accurate)
 possible to remove specified (trivial words)
 mood/gender word counts possible
+
 to-do: implement way for the user to specify the 
 mood/gender/trivial words and replace the default placeholder lists
 
