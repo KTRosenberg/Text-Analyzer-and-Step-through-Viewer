@@ -515,7 +515,8 @@ line_info: [starting_positions of first chars in lines...]
     
 I would just like to experiment with this idea, though all of the reading/writing may introduce too many inefficiencies
 and could be even worse than the current implementation that uses binary search,
-though list indexing may be simpler to read.
+though list indexing may be simpler to read. I also have to consider what I would do when a single word appears multiple times on
+a single line. One tuple may not be enough in the above possible system without even more indices being stored.
 It may be good to try iterating through lines (where full lines are stored at indices in a line[] list
 """
 
