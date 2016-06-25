@@ -1051,7 +1051,7 @@ def main():
         if option == '' or option == '1':
             option = input("Enter the index of a file in the current working directory: ")
             encoding_ = input("Enter the encoding of the file, (enter or 1 for ascii default), (2 for utf-8), (3 for mac-roman), specify otherwise: ") 
-            if encoding_ == '' or _encoding == '1':
+            if encoding_ == '' or encoding_ == '1':
                 encoding_ = "ascii"
             elif encoding_ == '2':
                 encoding_ = "utf-8"
