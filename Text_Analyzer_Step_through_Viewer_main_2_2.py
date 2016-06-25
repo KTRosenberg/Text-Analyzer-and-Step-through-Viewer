@@ -150,7 +150,7 @@ def is_valid_char(char, in_word_punct):
 """
 print_instructions
 
-displays the commands for text_step and word_step functions
+    displays the commands for text_step and word_step functions
 """
 def print_instructions():
     print("TEXT STEP COMMANDS:\n\
@@ -164,41 +164,46 @@ def print_instructions():
 """
 word_step
 
-params:
-    list, text_as_lines: 
-        the entire input text divided into lines,
-        where line i is stored in text_as_lines[i-1]
-    list, word_analysis:
-        information pertaining to a specific word in the text:
-        word_analysis[0]:
-            int (number of instances of the given word in the text)
-        word_analysis[1]:
-            list of int (for each instance of the given word,
-            stores--in order--the line numbers on which the word occurred)
-        word_analysis[2]:
-            list of int (understand the entire text as a list of words, where word i is the ith word in the text,
-            this list stores the word index i for each instance of the given word
-        word_analysis[3]:
-            list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
-            this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
-            list with word_analysis[1])
+    skips to instances of the chosen word within the text,
+    displays number of words skipped with each movement,
+    displays position of each word instance with respect to the "list" of all
+    words in the text
+    
+    enter '<' or '>' to skip to the previous or next instance of the chosen word
 
-        word_analysis   =   [
-                                1, 
-                                [line_count-1], 
-                                [word_i],
-                                [pos_on_line]
-                            ]
+    param:
+        list, text_as_lines: 
+            the entire input text divided into lines,
+            where line i is stored in text_as_lines[i-1]
+        list, word_analysis:
+            information pertaining to a specific word in the text:
+            word_analysis[0]:
+                int (number of instances of the given word in the text)
+            word_analysis[1]:
+                list of int (for each instance of the given word,
+                stores--in order--the line numbers on which the word occurred)
+            word_analysis[2]:
+                list of int (understand the entire text as a list of words, where word i is the ith word in the text,
+                this list stores the word index i for each instance of the given word
+            word_analysis[3]:
+                list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
+                this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
+                list with word_analysis[1])
 
+            word_analysis   =   [
+                                    1, 
+                                    [line_count-1], 
+                                    [word_i],
+                                    [pos_on_line]
+                                ]
 
-optional param: 
-        string, choice:
-            for now word_step is entered only from text_step when the '<' or '>' command 
-            (to step to the previous or the next instance) is entered, but the default choice is now '>'
+    optional param: 
+            string, choice:
+                for now word_step is entered only from text_step when the '<' or '>' command 
+                (to step to the previous or the next instance) is entered, but the default choice is now '>'
+
 """
 def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
-
-    print("ENTERING WORD_STEP\n\n")
 
     line_nums   = word_analysis[LINENUMBERS]
     word_i      = word_analysis[IWORDINTEXT]
@@ -339,10 +344,35 @@ text_step
     step-through lines in the text,
         enter a positive number n to display and step forward by n lines
         enter a negative number -n to skip to line number |-n|
-        enter '<' or '>' to skip to the previous or next instance of the chosen word (see word_step)
+        enter '<' or '>' to skip to the previous or next instance of the chosen word (see word_step() )
         (whose word_analysis list is passed to text_step() )
         enter "qa" to display the instructions
         enter 0 to exit
+    param:
+        list, text_as_lines: 
+            the entire input text divided into lines,
+            where line i is stored in text_as_lines[i-1]
+        list, word_analysis:
+            information pertaining to a specific word in the text:
+            word_analysis[0]:
+                int (number of instances of the given word in the text)
+            word_analysis[1]:
+                list of int (for each instance of the given word,
+                stores--in order--the line numbers on which the word occurred)
+            word_analysis[2]:
+                list of int (understand the entire text as a list of words, where word i is the ith word in the text,
+                this list stores the word index i for each instance of the given word
+            word_analysis[3]:
+                list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
+                this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
+                list with word_analysis[1])
+
+            word_analysis   =   [
+                                    1, 
+                                    [line_count-1], 
+                                    [word_i],
+                                    [pos_on_line]
+                                ]
 
 """
 def text_step(text_as_lines, word_analysis):
@@ -449,70 +479,72 @@ text_step.first_time = True
 """
 calc_w_data
 
-calculates word frequencies given a text string,
-can find additional (optional) information
+    calculates word frequencies given a text string,
+    can find additional (optional) information, ignore trivial words, ignore words above a certain length,
+    other possibilities are a work-in-progress
 
-params: string all_text
-optional params: pass 1 or 0 to specify option, or specify a list of words for a list parameter
-    clean: clean text/words
-    max_len: omit words of length greater than max_len
-    trivial: omit trivial words
-    trivial_list: specifies a list of trivial words
-    gender: count words with male or female qualities, 
-        stores another dictionary in list of dictionaries returned from function,
-        contains counts and percentages for male and female,
-    gender_terms: specifies a list of gender words
-    mood: count words with happy or sad qualities
-        stores another dictionary in list of dictionaries returned from function,
-        contains counts and percentages for happy and sad
-    mood_terms: specifies a list of happy or sad words
-    in_word_punct: list of acceptable in-word punctuation
+    param: string all_text
+    optional params: pass 1 or 0 to specify option, or specify a list of words for a list parameter
+        clean: clean text/words
+        max_len: omit words of length greater than max_len
+        trivial: omit trivial words
+        trivial_list: specifies a list of trivial words
+        gender: count words with male or female qualities, 
+            stores another dictionary in list of dictionaries returned from function,
+            contains counts and percentages for male and female,
+        gender_terms: specifies a list of gender words
+        mood: count words with happy or sad qualities
+            stores another dictionary in list of dictionaries returned from function,
+            contains counts and percentages for happy and sad
+        mood_terms: specifies a list of happy or sad words
+        in_word_punct: list of acceptable in-word punctuation
     
-return: 
-    dictionary analysis_dict of word_analysis dictionary and optional dictionaries
-                            (access with analysis_dict["word analysis"]
-        list, word_analysis: (access with analysis_dict["word analysis"])
-            information pertaining to a specific word in the text:
-            word_analysis[0]:
-                int (number of instances of the given word in the text)
-            word_analysis[1]:
-                list of int (for each instance of the given word,
-                stores--in order--the line numbers on which the word occurred)
-            word_analysis[2]:
-                list of int (understand the entire text as a list of words, where word i is the ith word in the text,
-                this list stores the word index i for each instance of the given word
-            word_analysis[3]:
-                list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
-                this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
-                list with word_analysis[1])
+    return: 
+        dictionary analysis_dict of word_analysis dictionary and optional dictionaries
+                                (access with analysis_dict["word analysis"]
+            list, word_analysis: (access with analysis_dict["word analysis"])
+                information pertaining to a specific word in the text:
+                word_analysis[0]:
+                    int (number of instances of the given word in the text)
+                word_analysis[1]:
+                    list of int (for each instance of the given word,
+                    stores--in order--the line numbers on which the word occurred)
+                word_analysis[2]:
+                    list of int (understand the entire text as a list of words, where word i is the ith word in the text,
+                    this list stores the word index i for each instance of the given word
+                word_analysis[3]:
+                    list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
+                    this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
+                    list with word_analysis[1])
 
-            word_analysis   :   [
-                                    1, 
-                                    [line_count-1], 
-                                    [word_i],
-                                    [pos_on_line]
-                                ]
+                word_analysis   :   [
+                                        1, 
+                                        [line_count-1], 
+                                        [word_i],
+                                        [pos_on_line]
+                                    ]
 
-            UNUSED/UNCALCULATED:    
-                word_analysis[4]:
-                    list of int (understand the entire text as a single string with indices 0-length_of_text-1,
-                    this list stores the index of the first character of the given word for each instance of the word)
+                UNUSED/UNCALCULATED:    
+                    word_analysis[4]:
+                        list of int (understand the entire text as a single string with indices 0-length_of_text-1,
+                        this list stores the index of the first character of the given word for each instance of the word)
         
-        list, text_as_lines: (access with analysis_dict["text as lines"])
-            the entire input text divided into lines,
-            where line i is stored in text_as_lines[i-1]
-        word list: (access with analysis_dict["word list"]
-            access list of words with analysis_dict[1]
+            list, text_as_lines: (access with analysis_dict["text as lines"])
+                the entire input text divided into lines,
+                where line i is stored in text_as_lines[i-1]
+            word list: (access with analysis_dict["word list"]
+                access list of words with analysis_dict[1]
 
-        other work-in-progress options:
-            gender: (access with analysis_dict["gender stat"]
-                access counts with [m] and [f]
-                access percentages with [%_m] and [%_f]
-                access percent of words identifiable as masculine or feminine with [%_indentifiable]
-            mood: (access with analysis_dict["mood stat"])
-                access counts with [:D] and [D:]
-                access percentages with [%_:D] and [%_D:]
-                access percent of words identifiable as happy or sad with [%_indentifiable]
+            other work-in-progress options:
+                gender: (access with analysis_dict["gender stat"]
+                    access counts with [m] and [f]
+                    access percentages with [%_m] and [%_f]
+                    access percent of words identifiable as masculine or feminine with [%_indentifiable]
+                mood: (access with analysis_dict["mood stat"])
+                    access counts with [:D] and [D:]
+                    access percentages with [%_:D] and [%_D:]
+                    access percent of words identifiable as happy or sad with [%_indentifiable]
+
 """
 def calc_w_analysis(
 all_text, 
@@ -735,7 +767,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             text_as_lines_append_(''.join(chars_in_this_line))
 
         #print(word_analysis)
-        print('cleaned\n')
+        #print('cleaned\n')
     #else create a word frequency dictionary of words in all_text including punctuation
     else:
         #hasalpha_w is true if the current word under construction has an alphabetical character
@@ -771,7 +803,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                 del new_word[:]
                 hasalpha_w = False
         #print(word_analysis)
-        print('not cleaned\n')
+        #print('not cleaned\n')
 
     ####################################
 
@@ -792,7 +824,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         word_analysis = temp_dict
 
         #print(word_analysis)
-        print('maxlen-ed\n')
+        #print('maxlen-ed\n')
     
     #if trivial words are to be omitted
     #overwrite the word_analysis dictionary with a dictionary that
@@ -810,7 +842,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         word_analysis = temp_dict
 
         #print(word_analysis)
-        print('detrivialized\n')
+        #print('detrivialized\n')
 
     #if gender terms are to be counted:
     if gender:
@@ -869,7 +901,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         mood_stat['%_indentifiable'] = ((mood_stat[':D'] + mood_stat['D:']) / len(word_analysis))*100
 
         #print(mood_stat)
-        print('mooded\n')
+        #print('mooded\n')
 
     #add specific dictionaries to the analysis dictionary for output
 
