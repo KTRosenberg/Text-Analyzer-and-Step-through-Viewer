@@ -477,7 +477,7 @@ text_step.first_time = True
 
 
 """
-calc_w_data
+calc_w_analysis
 
     calculates word frequencies given a text string,
     can find additional (optional) information, ignore trivial words, ignore words above a certain length,
@@ -1007,9 +1007,7 @@ def main():
     """
     FILE SELECTION, OPEN FILE FOR READING
     """
-    #original test files for first versions of program,
-    #user may attempt to select any file in the current working directory
-    text_options = ["Hamlet.txt", "test.txt", "test_2.txt", "test_3.txt"]
+
     #stores the input text file
     text_file = ''
     
@@ -1052,15 +1050,15 @@ def main():
 
         if option == '' or option == '1':
             option = input("Enter the index of a file in the current working directory: ")
-            _encoding = input("Enter the encoding of the file, (enter or 1 for ascii default), (2 for utf-8), (3 for mac-roman), specify otherwise: ") 
-            if _encoding == '' or _encoding == '1':
-                _encoding = "ascii"
-            elif _encoding == '2':
-                _encoding = "utf-8"
-            elif _encoding == '3':
-                _encoding = "mac-roman"
+            encoding_ = input("Enter the encoding of the file, (enter or 1 for ascii default), (2 for utf-8), (3 for mac-roman), specify otherwise: ") 
+            if encoding_ == '' or _encoding == '1':
+                encoding_ = "ascii"
+            elif encoding_ == '2':
+                encoding_ = "utf-8"
+            elif encoding_ == '3':
+                encoding_ = "mac-roman"
             try:
-                text_file = open(file_options[int(option)], 'r', encoding=_encoding)
+                text_file = open(file_options[int(option)], 'r', encoding=encoding_)
             except:
                 print("ERROR: unable to open the file\n")
             else:
@@ -1082,10 +1080,10 @@ def main():
     #call calc_w_analysis() and save the analysis list that it returns
     analysis_dict = calc_w_analysis(all_text, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
 
+
     """
     OUTPUT DISPLAY
     """
-
     
     if len(analysis_dict["word list"]) == 0:
         print("Nothing\n")
@@ -1129,7 +1127,6 @@ def main():
         print("Longest word: ",w_longest[0], " character length:",str(len_longest), "\n\n")
     
     print("-------------------------------------------------------------------------------")
-    time.sleep(1)
 
     if choices_list[3] > 0:
         print("////Gender Information////\n\n")
