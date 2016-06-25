@@ -1,4 +1,4 @@
-# Text-Analyzer-and-Step-through-Viewer
+# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2)
 This project started as a word frequency/counter,
 but I wanted to add the ability to step through a given text via command line,
 jumping to specific lines and between instances of specific words.
@@ -10,8 +10,11 @@ The best option is to set all defaults and to select one of the files (or place 
 
 Karl Toby Rosenberg
 
-Text Analyzer (word counts, separation of instances of words, others) and Basic Text Viewer
-ver 1.2_9_2
+Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
+ver 2.2
+
+main change: stores text as strings for each line
+(this is an experiment and needs testing to see whether it is an improvement over storing new-line positions)
 
 Dictionary and Word Frequency
 
@@ -41,4 +44,4 @@ mood/gender word counts possible
 to-do: implement way for the user to specify the 
 mood/gender/trivial words and replace the default placeholder lists
 
-current version June 12, 2016
+current version June 25, 2016
