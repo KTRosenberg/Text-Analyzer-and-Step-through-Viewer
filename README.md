@@ -13,6 +13,8 @@ Karl Toby Rosenberg
 Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
 ver 2.2
 
+ver 2.3, testing reading a line at a time
+
 main change: stores text as strings for each line
 (this is an experiment and needs testing to see whether it is an improvement over storing new-line positions)
 
