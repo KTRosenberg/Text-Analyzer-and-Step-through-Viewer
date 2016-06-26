@@ -624,7 +624,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #word start index with respect to text
         #pos_in_text = 0
 
+        #read the first line
         line = text_file.readline()
+        #while the file has a line to read, character-by-character
         while line:
             #iterate through each character in the line
             for char in line:
