@@ -1,4 +1,4 @@
-# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2)
+# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2 and 2.3)
 This project started as a word frequency/counter,
 but I wanted to add the ability to step through a given text via command line,
 jumping to specific lines and between instances of specific words.
