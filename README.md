@@ -46,4 +46,4 @@ mood/gender word counts possible
 to-do: implement way for the user to specify the 
 mood/gender/trivial words and replace the default placeholder lists
 
-current version June 25, 2016
+current version June 25/26, 2016
