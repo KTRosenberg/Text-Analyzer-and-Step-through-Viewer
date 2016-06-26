@@ -624,8 +624,8 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #word start index with respect to text
         #pos_in_text = 0
 
-        #read a line from the text
-        for line in text_file.read():
+        line = text_file.readline()
+        while line:
             #iterate through each character in the line
             for char in line:
                 char_count_line += 1
@@ -760,6 +760,8 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
 
                     #reset the word string
                     del new_word[:]
+            #read a line from the text
+            line = text_file.readline()
         #append any remaining characters 
         if(len(chars_in_this_line) > 0):
             #append a guard new-line character if the text does not end with a new-line character
