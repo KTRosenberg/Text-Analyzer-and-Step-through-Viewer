@@ -762,6 +762,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                     del new_word[:]
             #read a line from the text
             line = text_file.readline()
+
         #append any remaining characters 
         if(len(chars_in_this_line) > 0):
             #append a guard new-line character if the text does not end with a new-line character
