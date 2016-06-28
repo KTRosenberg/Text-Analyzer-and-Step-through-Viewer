@@ -1,4 +1,4 @@
-# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2 and 2.3)
+# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2 and 3)
 This project started as a word frequency/counter,
 but I wanted to add the ability to step through a given text via command line,
 jumping to specific lines and between instances of specific words.
@@ -13,12 +13,18 @@ Karl Toby Rosenberg
 Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
 ver 2.2
 
-ver 2.3, testing reading a line at a time
 
-main change: stores text as strings for each line
-(this is an experiment and needs testing to see whether it is an improvement over storing new-line positions)
+Implementations of main and test versions:
 
-Dictionary and Word Frequency
+1> store positions of new-line characters (the index of the characters with respect to the entire list), read characters until new-lines are reached
+
+2.2> store the text as lines (0 through L-1) in a list
+
+3> BUGGY EXPERIMENT store positions of the beginning of each line (the index of the starting character with respect to the entire text),
+does NOT store the list, reads directly from file object
+(ONLY WORKS WITH \n new-lines, and only sometimes, FOR NOW, buggy)
+
+I am experimenting with the above to see which may work best.
 
 Step-through-text-viewer:
 
