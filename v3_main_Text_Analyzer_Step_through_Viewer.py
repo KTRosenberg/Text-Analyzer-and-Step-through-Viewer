@@ -32,7 +32,7 @@ Text Analyzer (word counts, number of words between instances of a given word)
 and Basic Text Viewer
 ver 3.0
 
-\n-only new-lines for now, BUGGY EXPERIMENT
+(Tested on ASCII and UTF-8 texts)
 
 -Dictionary and Word Frequency
 
@@ -56,7 +56,7 @@ ver 3.0
     to-do: implement way for the user to specify the 
     mood/gender/trivial words and replace the default placeholder lists
 
-current version June 12, 2016
+current version June 29, 2016
 """
 #############################
 
@@ -68,7 +68,6 @@ finds and returns the index of the nearest line number greater or equal to the s
 returns -1 if there is no such valid line in the correct range
 """
 def binary_min_line_above_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER >=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = high
     if line_numbers[index_first_valid_line] == starting_line:
@@ -76,14 +75,17 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+        
         if test_line == starting_line:
             return mid
         elif test_line < starting_line:
             low = mid + 1
-        else: #if line_numbers[mid] > starting_line
-            if line_numbers[index_first_valid_line] > test_line:
+        else: #if test_line > starting_line
+            if line_numbers[index_first_valid_line] >= test_line and mid < index_first_valid_line:
                 index_first_valid_line = mid
-            high = mid - 1
+                high = mid - 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] < starting_line:
         return -1
     return index_first_valid_line
@@ -96,7 +98,6 @@ finds and returns the index of the nearest line number less than or equal to the
 returns -1 if there is no such valid line in the correct range
 """
 def binary_max_line_below_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER <=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = low
     if line_numbers[index_first_valid_line] == starting_line:
@@ -104,14 +105,17 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+
         if test_line == starting_line:
             return mid
         elif test_line > starting_line:
             high = mid - 1
-        else: #if line_numbers[mid] < starting_line
-            if line_numbers[index_first_valid_line] < test_line:
+        else: #if test_line < starting_line
+            if line_numbers[index_first_valid_line] <= test_line and mid > index_first_valid_line:
                 index_first_valid_line = mid
-            low = mid + 1
+                low = mid + 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] > starting_line:
         return -1
     return index_first_valid_line
@@ -208,7 +212,7 @@ def word_step(file, line_start_pos, word_analysis, starting_line, choice='>'):
 
     line_nums   = word_analysis[LINENUMBERS]
     word_i      = word_analysis[IWORDINTEXT]
-    pos_on_line = word_analysis[ICHARONLINE] 
+    pos_on_line = word_analysis[ICHARONLINE]
 
     #track current line
     current_line = starting_line
@@ -252,7 +256,7 @@ def word_step(file, line_start_pos, word_analysis, starting_line, choice='>'):
     
     #if a word instance index has been found and the line is not the first
     #(If the line is the first, then the default values have already been set and do not need to be changed)
-    if found >= 0 and line_nums[found] > 1:
+    if found >= 0:
         #set the word and line start positions to the beginning of the line holding the word instance
         w_inst_index = found
         current_line = line_nums[w_inst_index]
@@ -662,19 +666,17 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #while the file has a line to read, character-by-character
         while line:
             #iterate through each character in the line
-            for char in line:
+            for c in range(0, len(line)):
+                char = line[c]
                 pos_in_text += 1
                 char_count_line += 1
 
-                #add the character to "chars in this line"
-                #chars_in_this_line_append_(char)
-
-                #if char is new-line, 
+                if char == '\r':
+                    continue
                 if char == '\n':
                     #reset the number of characters reached with respect to the line
                     char_count_line = -1
 
-                    #del chars_in_this_line[:]
                     #increment the line count
                     line_count += 1
 
@@ -694,9 +696,6 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                     #mark the starting position of the word, mark the word as alphabetic
                     if has_alpha == False:
                         pos_on_line = char_count_line
-
-                        #UNUSED
-                        #pos_in_text = char_count_text
 
                         has_alpha = True
                     #if characters are waiting in the punctuation buffer,
@@ -750,7 +749,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                             #list of the positions of the first char for each instance of the word with respect to the current line in the text,
 
                             #add an entry for the joined_word
-                            if char == '\n':
+                            if char == 'r' or char == '\n':
                                 #if the current character is a new-line character, the line-count is off by +1
                                 word_analysis[joined_word] =    [
                                                                     1, 
@@ -779,7 +778,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                             #increment the word frequency count
                             word_data[WORDCOUNT] += 1
                             #append the next valid line number
-                            if char == '\n':
+                            if char == 'r' or char == '\n':
                                 word_data[LINENUMBERS].append(line_count-1)
                             else:
                                 word_data[LINENUMBERS].append(line_count)
@@ -810,7 +809,6 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #append the first position beyond the end of the text
         line_start_pos_(pos_in_text + 1)
 
-        print(line_start_pos)
 
 
         #print(word_analysis)
@@ -1106,7 +1104,7 @@ def main():
             elif encoding_ == '3':
                 encoding_ = "mac-roman"
             try:
-                text_file = open(file_options[int(option)], 'r', encoding=encoding_)
+                text_file = open(file_options[int(option)], 'r', encoding=encoding_, newline='')
             except:
                 print("ERROR: unable to open the file\n")
             else:
