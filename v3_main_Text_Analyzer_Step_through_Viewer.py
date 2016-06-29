@@ -5,10 +5,10 @@ import os
 import time
 
 #variables for alphabetic characters 
-a__ = 65
-z__ = 90
-A__ = 97
-Z__ = 122
+a_ = 65
+z_ = 90
+A_ = 97
+Z_ = 122
 
 #variables for accessing word_analysis list
 WORDCOUNT   = 0
@@ -137,7 +137,7 @@ def clean_word(word):
     cmp = 0
     for char in word:
         cmp = ord(char)
-        if (cmp >= a__ and cmp <= z__) or (cmp >= A__ and cmp <= Z__):
+        if (cmp >= a_ and cmp <= z_) or (cmp >= A_ and cmp <= Z_):
             cleaned.append(char)
     return ''.join(cleaned)
 
@@ -149,7 +149,7 @@ returns True if valid, else returns False
 """
 def is_valid_char(char, in_word_punct):
     val = ord(char)
-    if (val >= a__ and val <= z__) or (val >= A__ and val <= Z__) or char in in_word_punct:
+    if (val >= a_ and val <= z_) or (val >= A_ and val <= Z_) or char in in_word_punct:
         return True
     return False
 
@@ -948,6 +948,7 @@ encoding='utf-8'
     #add specific dictionaries to the analysis dictionary for output
 
     #word analysis
+
     analysis_dict["word analysis"] = word_analysis
     #text as indices of characters, positions of beginning of line
     print(line_start_pos)
@@ -1209,6 +1210,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    #allow control+d (do not display error)
+    #allow control+d
     except EOFError:
         pass
