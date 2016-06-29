@@ -32,7 +32,10 @@ Text Analyzer (word counts, number of words between instances of a given word)
 and Basic Text Viewer
 ver 3.0
 
-(Tested on ASCII and UTF-8 texts)
+(Currently version 3 works with texts that have only ASCII characters
+as a result of the way it tracks positions in the file. I will look into
+measuring the sizes in bytes of unicode characters,
+also, it is best to use version 3 on texts with consistent types of new-lines and escape characters)
 
 -Dictionary and Word Frequency
 
