@@ -254,8 +254,7 @@ def word_step(file, line_start_pos, word_analysis, starting_line, choice='>'):
         else:
             current_line = line_nums[0]
     
-    #if a word instance index has been found and the line is not the first
-    #(If the line is the first, then the default values have already been set and do not need to be changed)
+    #set the current word instance index and set the current line to be the instance's line
     if found >= 0:
         #set the word and line start positions to the beginning of the line holding the word instance
         w_inst_index = found
