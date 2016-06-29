@@ -18,7 +18,7 @@ Implementations of main and test versions:
 
 1> store positions of new-line characters (the index of the characters with respect to the entire list), read characters until new-lines are reached
 
-2.2> store the text as lines (0 through L-1) in a list
+2_2> store the text as lines (0 through L-1) in a list
 
 3> store positions of the beginning of each line (the index of the starting character with respect to the entire text),
 does NOT store the list, reads directly from file object
