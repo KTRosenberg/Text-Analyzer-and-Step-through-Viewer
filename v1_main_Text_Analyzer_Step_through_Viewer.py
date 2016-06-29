@@ -52,14 +52,13 @@ current version June 12, 2016
 #############################
 
 """
-binary_min_line_above_search
+binary_min_linea_bove_search
 
 given a starting line number and a list of valid line numbers,
 finds and returns the index of the nearest line number greater or equal to the starting line
 returns -1 if there is no such valid line in the correct range
 """
 def binary_min_line_above_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER >=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = high
     if line_numbers[index_first_valid_line] == starting_line:
@@ -67,14 +66,17 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+        
         if test_line == starting_line:
             return mid
         elif test_line < starting_line:
             low = mid + 1
-        else: #if line_numbers[mid] > starting_line
-            if line_numbers[index_first_valid_line] > test_line:
+        else: #if test_line > starting_line
+            if line_numbers[index_first_valid_line] >= test_line and mid < index_first_valid_line:
                 index_first_valid_line = mid
-            high = mid - 1
+                high = mid - 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] < starting_line:
         return -1
     return index_first_valid_line
@@ -87,7 +89,6 @@ finds and returns the index of the nearest line number less than or equal to the
 returns -1 if there is no such valid line in the correct range
 """
 def binary_max_line_below_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER <=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = low
     if line_numbers[index_first_valid_line] == starting_line:
@@ -95,17 +96,21 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+
         if test_line == starting_line:
             return mid
         elif test_line > starting_line:
             high = mid - 1
-        else: #if line_numbers[mid] < starting_line
-            if line_numbers[index_first_valid_line] < test_line:
+        else: #if test_line < starting_line
+            if line_numbers[index_first_valid_line] <= test_line and mid > index_first_valid_line:
                 index_first_valid_line = mid
-            low = mid + 1
+                low = mid + 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] > starting_line:
         return -1
     return index_first_valid_line
+
 
 """
 clean_word
