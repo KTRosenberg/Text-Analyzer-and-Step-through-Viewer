@@ -57,7 +57,7 @@ ver 2.0
     to-do: implement way for the user to specify the 
     mood/gender/trivial words and replace the default placeholder lists
 
-current version June 12, 2016
+current version June 29, 2016
 """
 #############################
 
@@ -69,7 +69,6 @@ finds and returns the index of the nearest line number greater or equal to the s
 returns -1 if there is no such valid line in the correct range
 """
 def binary_min_line_above_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER >=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = high
     if line_numbers[index_first_valid_line] == starting_line:
@@ -77,14 +76,17 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+        
         if test_line == starting_line:
             return mid
         elif test_line < starting_line:
             low = mid + 1
-        else: #if line_numbers[mid] > starting_line
-            if line_numbers[index_first_valid_line] > test_line:
+        else: #if test_line > starting_line
+            if line_numbers[index_first_valid_line] >= test_line and mid < index_first_valid_line:
                 index_first_valid_line = mid
-            high = mid - 1
+                high = mid - 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] < starting_line:
         return -1
     return index_first_valid_line
@@ -97,7 +99,6 @@ finds and returns the index of the nearest line number less than or equal to the
 returns -1 if there is no such valid line in the correct range
 """
 def binary_max_line_below_search(line_numbers, low, high, starting_line):
-    #print("SEARCHING FOR LINE NUMBER <=", starting_line, ' ', line_numbers)
     mid = 0
     index_first_valid_line = low
     if line_numbers[index_first_valid_line] == starting_line:
@@ -105,14 +106,17 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
     while low <= high:
         mid = (low + high)//2
         test_line = line_numbers[mid]
+
         if test_line == starting_line:
             return mid
         elif test_line > starting_line:
             high = mid - 1
-        else: #if line_numbers[mid] < starting_line
-            if line_numbers[index_first_valid_line] < test_line:
+        else: #if test_line < starting_line
+            if line_numbers[index_first_valid_line] <= test_line and mid > index_first_valid_line:
                 index_first_valid_line = mid
-            low = mid + 1
+                low = mid + 1
+            if low == high:
+                return index_first_valid_line
     if line_numbers[index_first_valid_line] > starting_line:
         return -1
     return index_first_valid_line
@@ -248,7 +252,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     
     #if a word instance index has been found and the line is not the first
     #(If the line is the first, then the default values have already been set and do not need to be changed)
-    if found >= 0 and line_nums[found] > 1:
+    if found >= 0:
         #set the word and line start positions to the beginning of the line holding the word instance
         w_inst_index = found
         current_line = line_nums[w_inst_index]
