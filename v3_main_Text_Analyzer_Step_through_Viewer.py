@@ -33,9 +33,9 @@ and Basic Text Viewer
 ver 3.0
 
 (Currently version 3 works with texts that have only ASCII characters
-as a result of the way it tracks positions in the file. I will look into
-measuring the sizes in bytes of unicode characters,
-also, it is best to use version 3 on texts with consistent types of new-lines and escape characters)
+as a result of the way it tracks positions in the file.
+I believe that I have correctly implemented the way to track unicode character positions as well, but
+this needs more testing.
 
 -Dictionary and Word Frequency
 
@@ -240,7 +240,7 @@ def word_step(file, line_start_pos, word_analysis, starting_line, choice='>'):
 
             #return (0, 0) if the end of the file has been reached (no more instances later in the text) to exit
             if found == -1:
-                print("End of file reached\n")
+                print("End of file reached at L" + str(total_lines) + '\n')
                 return 0, 0
         else:
             current_line = line_nums[0]
@@ -353,7 +353,7 @@ def word_step(file, line_start_pos, word_analysis, starting_line, choice='>'):
                 legal_command = False
                 continue
     #if the end of the file has been reached, return 0 0 to text_step (0 is the command to exist text_step)
-    print("End of file reached\n")
+    print("End of file reached at L" + str(total_lines) + '\n')
     return 0, 0
 
 """
@@ -509,7 +509,7 @@ def text_step(file, line_start_pos, word_analysis):
                     print("ERROR")
                     continue
     #before returning from the function, display the final line number if the end of the final has been reached
-    print("End of file reached at L" + str(current_line_index) + '\n')
+    print("End of file reached at L" + str(total_lines) + '\n')
 
 #function attribute,
 #True if function call is the first one of the current session
@@ -584,6 +584,7 @@ calc_w_analysis
                     access counts with [:D] and [D:]
                     access percentages with [%_:D] and [%_D:]
                     access percent of words identifiable as happy or sad with [%_indentifiable]
+                encoding: the character encoding to use
 
 """
 def calc_w_analysis(
@@ -594,7 +595,8 @@ trivial=1, trivial_list=[],
 gender=0, gender_terms=[], 
 mood=0, mood_terms=[], 
 in_word_punct=["'", '-', u"’"],
-eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]}
+eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]},
+encoding='utf-8'
 ):
     
     #dictionary of lists and dictionaries to return
@@ -661,6 +663,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #index with respect to text
         pos_in_text = -1
 
+        ch_encode_ = str.encode
         bytes = 1
 
         #read the first line
@@ -670,10 +673,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             #iterate through each character in the line
             for c in range(0, len(line)):
                 char = line[c]
-                #bytes = len(s.encode('utf-8'))
-                print(bytes)
-                pos_in_text += 1
-                char_count_line += 1
+                pos_in_text += bytes
+                char_count_line += bytes
+                bytes = len(ch_encode_(char, encoding))
 
                 if char == '\r':
                     continue
@@ -800,18 +802,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                     del new_word[:]
             #read a line from the text
             line = text_file.readline()
-
-        #append any remaining characters
-        """ 
-        if(len(chars_in_this_line) > 0):
-            #append a guard new-line character if the text does not end with a new-line character
-            if chars_in_this_line[len(chars_in_this_line) - 1] != '\n':
-                chars_in_this_line_append_('\n')
-            text_as_lines_append_(''.join(chars_in_this_line))
-        """
         
         #append the first position beyond the end of the text
-        line_start_pos_(pos_in_text + 1)
+        line_start_pos_(pos_in_text + bytes)
 
 
 
@@ -1100,7 +1093,7 @@ def main():
 
         if option == '' or option == '1':
             option = input("Enter the index of a file in the current working directory: ")
-            encoding_ = input("Enter the encoding of the file, (enter or 1 for ascii default), (2 for utf-8), (3 for mac-roman), specify otherwise: ") 
+            encoding_ = input("Enter the encoding of the file, (enter or 1 for ascii default): ") 
             if encoding_ == '' or encoding_ == '1':
                 encoding_ = "ascii"
             elif encoding_ == '2':
@@ -1120,7 +1113,7 @@ def main():
     #try to read the text file 
     #(call call_calc_w_analysis()) and save the analysis list that it returns
     try:
-        analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+        analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [], encoding_)  
     except:
         sys.exit("ERROR in calc_w_analysis")
 
@@ -1215,7 +1208,6 @@ def main():
     
 #main function
 if __name__ == "__main__":
-    print(len(u"’"))
     try:
         main()
     #allow control+d

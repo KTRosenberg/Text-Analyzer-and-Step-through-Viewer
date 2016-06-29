@@ -27,8 +27,15 @@ implementation required check for both DOS/Windows and UNIX/UNIX-like system new
 -I have to see whether seek() buffers most of the types of files I am using,
 and I also have to see how it behaves when seeking backwards through a file.
 The program does not modify the text file or store the full text.
--ASCII-only supported, I will look into measuring the sizes in bytes of unicode characters,
-v1 and v2_2 are more flexible
+-ASCII-only supported for sure, but I believe that I have correctly implemented
+a way to track the positions of unicode characters, but the additional encoding
+slows the program more. I will see whether there are better ways of achieving the same effect.
+Otherwise version 3 is definitely best left as an ASCII-encoding-only version.
+Additional testing is probably best.
+(v1 and v2_2 are more tolerant for now)
+
+-NOTE: I believe that I made it possible for unicode character positions to be recorded
+correctly. This needs additional testing.
 
 
 Step-through-text-viewer:
