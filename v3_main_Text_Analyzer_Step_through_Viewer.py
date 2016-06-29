@@ -5,10 +5,10 @@ import os
 import time
 
 #variables for alphabetic characters 
-a_ = 65
-z_ = 90
-A_ = 97
-Z_ = 122
+a__ = 65
+z__ = 90
+A__ = 97
+Z__ = 122
 
 #variables for accessing word_analysis list
 WORDCOUNT   = 0
@@ -137,7 +137,7 @@ def clean_word(word):
     cmp = 0
     for char in word:
         cmp = ord(char)
-        if (cmp >= a_ and cmp <= z_) or (cmp >= A_ and cmp <= Z_):
+        if (cmp >= a__ and cmp <= z__) or (cmp >= A__ and cmp <= Z__):
             cleaned.append(char)
     return ''.join(cleaned)
 
@@ -149,7 +149,7 @@ returns True if valid, else returns False
 """
 def is_valid_char(char, in_word_punct):
     val = ord(char)
-    if (val >= a_ and val <= z_) or (val >= A_ and val <= Z_) or char in in_word_punct:
+    if (val >= a__ and val <= z__) or (val >= A__ and val <= Z__) or char in in_word_punct:
         return True
     return False
 
@@ -664,7 +664,7 @@ encoding='utf-8'
         pos_in_text = -1
 
         ch_encode_ = str.encode
-        bytes = 1
+        in_bytes = 1
 
         #read the first line
         line = text_file.readline()
@@ -673,9 +673,9 @@ encoding='utf-8'
             #iterate through each character in the line
             for c in range(0, len(line)):
                 char = line[c]
-                pos_in_text += bytes
-                char_count_line += bytes
-                bytes = len(ch_encode_(char, encoding))
+                pos_in_text += in_bytes
+                char_count_line += in_bytes
+                in_bytes = len(ch_encode_(char, encoding))
 
                 if char == '\r':
                     continue
@@ -804,7 +804,7 @@ encoding='utf-8'
             line = text_file.readline()
         
         #append the first position beyond the end of the text
-        line_start_pos_(pos_in_text + bytes)
+        line_start_pos_(pos_in_text + in_bytes)
 
 
 
@@ -948,7 +948,6 @@ encoding='utf-8'
     #add specific dictionaries to the analysis dictionary for output
 
     #word analysis
-
     analysis_dict["word analysis"] = word_analysis
     #text as indices of characters, positions of beginning of line
     print(line_start_pos)
@@ -1210,6 +1209,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    #allow control+d
+    #allow control+d (do not display error)
     except EOFError:
         pass
