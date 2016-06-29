@@ -11,7 +11,7 @@ The best option is to set all defaults and to select one of the files (or place 
 Karl Toby Rosenberg
 
 Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
-ver 2.2
+current test ver 3, June 29
 
 
 Implementations of main and test versions:
@@ -20,11 +20,15 @@ Implementations of main and test versions:
 
 2.2> store the text as lines (0 through L-1) in a list
 
-3> BUGGY EXPERIMENT store positions of the beginning of each line (the index of the starting character with respect to the entire text),
+3> store positions of the beginning of each line (the index of the starting character with respect to the entire text),
 does NOT store the list, reads directly from file object
-(ONLY WORKS WITH \n new-lines, and only sometimes, FOR NOW, buggy)
+implementation required check for both DOS/Windows and UNIX/UNIX-like system new-lines (\r\r, \n),
 
-I am experimenting with the above to see which may work best.
+-I have to see whether seek() buffers most of the types of files I am using,
+and I also have to see how it behaves when seeking backwards through a file.
+The program does not modify the text file or store the full text.
+-ASCII and UTF-8 supported, additional testing for UTF-8 required, other formats may be more easily processed in v1 of the program
+
 
 Step-through-text-viewer:
 
