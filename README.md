@@ -27,7 +27,8 @@ implementation required check for both DOS/Windows and UNIX/UNIX-like system new
 -I have to see whether seek() buffers most of the types of files I am using,
 and I also have to see how it behaves when seeking backwards through a file.
 The program does not modify the text file or store the full text.
--ASCII and UTF-8 supported, additional testing for UTF-8 required, other formats may be more easily processed in v1 of the program
+-ASCII-only supported, I will look into measuring the sizes in bytes of unicode characters,
+v1 and v2_2 are more flexible
 
 
 Step-through-text-viewer:
