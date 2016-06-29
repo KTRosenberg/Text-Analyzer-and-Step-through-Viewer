@@ -661,7 +661,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #index with respect to text
         pos_in_text = -1
 
-
+        bytes = 1
 
         #read the first line
         line = text_file.readline()
@@ -670,6 +670,8 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             #iterate through each character in the line
             for c in range(0, len(line)):
                 char = line[c]
+                #bytes = len(s.encode('utf-8'))
+                print(bytes)
                 pos_in_text += 1
                 char_count_line += 1
 
@@ -1213,6 +1215,7 @@ def main():
     
 #main function
 if __name__ == "__main__":
+    print(len(u"’"))
     try:
         main()
     #allow control+d
