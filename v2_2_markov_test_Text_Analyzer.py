@@ -33,7 +33,7 @@ NOMOVE = -1
 Karl Toby Rosenberg
 
 Text Analyzer (word counts, number of words between instances of a given word) 
-and Basic Text Viewer
+and Markov basic test
 ver 2.0
 
 -Dictionary and Word Frequency
