@@ -585,9 +585,6 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #save reference to new_word.append
     new_word_append_ = new_word.append
     
-    #create a new list to store each character to be combined into a line in the text
-    chars_in_this_line = []
-    chars_in_this_line_append_ = chars_in_this_line.append
     #for each line L store the line at index L in text_as_lines
     text_as_lines = []
     text_as_lines_append_ = text_as_lines.append
@@ -631,23 +628,19 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         line = text_file.readline()
         #iterate as long as another line exists in the text
         while line:
-        #iterate through each character in the input text
+            #store the line in the text
+            text_as_lines_append_(line)
+            #iterate through each character in the input text
             for char in line:
                 char_count_line += 1
 
                 #UNUSED
                 #char_count_text += 1
-
-                #add the character to "chars in this line"
-                chars_in_this_line_append_(char)
                         
                 #if char is new-line, 
                 if char == '\n':
                     #reset the number of characters reached with respect to the line
                     char_count_line = -1
-                    #store the entire line at the next index of "text as lines"
-                    text_as_lines_append_(''.join(chars_in_this_line))
-                    del chars_in_this_line[:]
                     #increment the line count
                     line_count += 1
             
@@ -768,16 +761,24 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             #try to read the next line
             line = text_file.readline()
 
-        #append any remaining characters 
-        if(len(chars_in_this_line) > 0):
-            #append a guard new-line character if the text does not end with a new-line character
-            if chars_in_this_line[len(chars_in_this_line) - 1] != '\n':
-                chars_in_this_line_append_('\n')
-            text_as_lines_append_(''.join(chars_in_this_line))
+        #append a guard new-line character if the text does not end with a new-line character
+        
+        if len(text_as_lines) > 0:
+            final_line_index = len(text_as_lines) - 1 
+            len_final_line = len(text_as_lines[final_line_index])
+            if len_final_line > 0:
+                text_as_lines[final_line_index] += '\n'
+            else:
+                text_as_lines[final_line_index] = '\n'
+        else:
+            text_as_lines_append_('\n')
+                
 
-            #print(word_analysis)
-            #print('cleaned\n')
-        #else create a word frequency dictionary of words in all_text including punctuation
+        
+        #print(word_analysis)
+        #print('cleaned\n')
+    #CAUTION, NON-CLEANED VERSION NEEDS TO BE RE-TESTED
+    #create a word frequency dictionary of words in text_file including punctuation
     else:
         #hasalpha_w is true if the current word under construction has an alphabetical character
         #this prevents non-words such as a hyphen '-' from being recognized as words
@@ -822,8 +823,17 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
 
     ####################################
 
-    #if no words, quit
+    #if no words, return
     if len(word_analysis) == 0:
+        analysis_dict["word analysis"] = word_analysis
+        #text divided into a list of lines
+        analysis_dict["text as lines"] = text_as_lines
+        #word list
+        analysis_dict["word list"] = word_list
+        #gender statistics
+        analysis_dict["gender stat"] = gender_stat
+        #mood statistics
+        analysis_dict["mood stat"] = mood_stat
         return analysis_dict
 
     #if a maximum word length is set,
@@ -926,6 +936,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #text divided into a list of lines
     analysis_dict["text as lines"] = text_as_lines
     #word list
+    print("LEN\n\n\n\n: ", len(word_list))
     analysis_dict["word list"] = word_list
     #gender statistics
     analysis_dict["gender stat"] = gender_stat
@@ -1083,11 +1094,11 @@ def main():
         try_new_file = False
 
     #try to read the text file
-    try:
+    #try:
         #call calc_w_analysis() and save the analysis list that it returns
-        analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
-    except:
-        sys.exit("ERROR: cannot read file")
+    analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+    #except:
+        #sys.exit("ERROR: cannot read file")
 
     text_file.close()
 
@@ -1097,7 +1108,7 @@ def main():
     """
     
     if len(analysis_dict["word list"]) == 0:
-        print("Nothing\n")
+        print("No words\n")
         sys.exit(0)
     
     print("////All Words in List////\n\n")
