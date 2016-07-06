@@ -1094,11 +1094,11 @@ def main():
         try_new_file = False
 
     #try to read the text file
-    #try:
+    try:
         #call calc_w_analysis() and save the analysis list that it returns
-    analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
-    #except:
-        #sys.exit("ERROR: cannot read file")
+        analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+    except:
+        sys.exit("ERROR: cannot read file")
 
     text_file.close()
 
