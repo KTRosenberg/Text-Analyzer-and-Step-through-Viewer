@@ -338,7 +338,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
                 legal_command = False
                 continue
     #if the end of the file has been reached, return 0 0 to text_step (0 is the command to exist text_step)
-    print("End of file reached\n")
+    print("End of file reached at L" + str(current_line) + '\n')
     return 0, 0
 
 """
@@ -761,8 +761,66 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             #try to read the next line
             line = text_file.readline()
 
-        #append a guard new-line character if the text does not end with a new-line character
+        #the following checks whether there are any trailing characters,
+        #I may remove the check and encourage the user to end a file with a new-line
+        if len(new_word) > 0:
+            #a new word has been completed, increment the word counter
+            word_i += 1
+            #saved the characters in new_word as a joined_word
+            joined_word = ''.join(new_word)
         
+            #if the new word has not been added to the dictionary and the word is alphabetical,
+            #add an entry for the word in the word list and in the dictionary with a count of 1
+            if joined_word not in word_analysis:
+
+                #integer representing the total word count for the given word,
+                #list of line numbers on which the word appears,
+                #list of the positions of each instance of the word with respect to the list of words in the entire text
+                #list of the positions of the first char for each instance of the word with respect to the entire text,
+                #list of the positions of the first char for each instance of the word with respect to the current line in the text,
+
+                #add an entry for the joined_word
+                if char == '\n':
+                    #if the current character is a new-line character, the line-count is off by +1
+                    word_analysis[joined_word] =    [
+                                                        1, 
+                                                        [line_count-1], 
+                                                        [word_i], 
+                                                        [pos_on_line]#,
+                                                        #[pos_in_text] 
+                                                    ]
+                else:
+                    word_analysis[joined_word] =    [
+                                                        1, 
+                                                        [line_count], 
+                                                        [word_i], 
+                                                        [pos_on_line]#,
+                                                        #[pos_in_text]
+                                                    ]
+
+                #add new word to word list
+                word_list_append(joined_word)
+        
+            #else if the new word has already been added to the dictionary,
+            #increment the frequency count and other information for that word
+            else:
+                #access the in-progress word data
+                word_data = word_analysis[joined_word]
+                #increment the word frequency count
+                word_data[WORDCOUNT] += 1
+                #append the next valid line number
+                if char == '\n':
+                    word_data[LINENUMBERS].append(line_count-1)
+                else:
+                    word_data[LINENUMBERS].append(line_count)
+            
+                #append the ith word value for the current instance of the word
+                word_data[IWORDINTEXT].append(word_i)
+                #append the starting position/index of the current word instance with respect to the current line
+                word_data[ICHARONLINE].append(pos_on_line)
+
+
+        #append a guard new-line character if the text does not end with a new-line character
         if len(text_as_lines) > 0:
             final_line_index = len(text_as_lines) - 1 
             len_final_line = len(text_as_lines[final_line_index])

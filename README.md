@@ -6,7 +6,9 @@ Information such as "number of words in between current and previously-visited" 
 It is possible to display a chosen number of lines in the text at a time.
 The project is a work-in-progress, and I intend to experiment with other ways to organize the necessary line/word information and 
 see whether there is any improvements or advantages. I have included various sample files (some large and others smaller). 
-The best option is to set all defaults and to select one of the files (or place your own in the directory.) Please enjoy.
+The best option is to set all defaults and to select one of the files (or place your own in the directory.)
+It is also ideal for processing to terminate input text files with a new-line character.
+Please enjoy.
 
 Karl Toby Rosenberg
 
