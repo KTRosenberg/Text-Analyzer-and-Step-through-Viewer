@@ -1155,7 +1155,7 @@ def main():
 
                 print("CHOSEN FILE: ", file_options[int(option)])
                 text_file = open(file_options[int(option)], 'r', encoding='utf-8')
-                next_text = text_file.read()
+                next_text = textread()
                 text_file.close()
                 text_list.append(next_text) 
 

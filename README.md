@@ -1,4 +1,4 @@
-# Text-Analyzer-and-Step-through-Viewer (TESTING version 2.2 and 3)
+# Text-Analyzer-and-Step-through-Viewer (Main version is v2_4)
 This project started as a word frequency/counter,
 but I wanted to add the ability to step through a given text via command line,
 jumping to specific lines and between instances of specific words.
@@ -11,14 +11,14 @@ The best option is to set all defaults and to select one of the files (or place 
 Karl Toby Rosenberg
 
 Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
-current test ver 3, June 29
+current test ver 3, July 6, 2016
 
 
 Implementations of main and test versions:
 
 1> store positions of new-line characters (the index of the characters with respect to the entire list), read characters until new-lines are reached
 
-2_2> store the text as lines (0 through L-1) in a list
+2_2 and _4> store the text as lines (0 through L-1) in a list
 
 3> store positions of the beginning of each line (the index of the starting character with respect to the entire text),
 does NOT store the list, reads directly from file object
@@ -64,4 +64,4 @@ mood/gender word counts possible
 to-do: implement way for the user to specify the 
 mood/gender/trivial words and replace the default placeholder lists
 
-current version June 25/26, 2016
+current version 2_4 July 6, 2016
