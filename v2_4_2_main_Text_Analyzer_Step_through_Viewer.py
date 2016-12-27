@@ -6,6 +6,13 @@ import time
 
 # module-level constants:
 
+PROGRAM_BANNER = ("+============================================+\n"
+                  "| Welcome!                                   |\n"
+                  "+============================================+\n")
+                  
+# directory of the program file
+PROGRAM_HOME = os.path.dirname(os.path.realpath(__file__))
+
 # for user input options in text_step and word_step functions
 ENTER = ''
 W_NEXT_INST = '>'
@@ -13,13 +20,13 @@ W_PREV_INST = '<'
 INSTRUCTIONS = 'qa'
 YES = NEXT_LINE = DEFAULT = 1
 NO = QUIT = FIRST = 0
-NOMOVE = -1
+NO_MOVE = -1
 
 # for accessing word_analysis list
-WORDCOUNT   = 0
-LINENUMBERS = 1
-IWORDINTEXT = 2
-ICHARONLINE = 3
+WORD_COUNT   = 0
+LINE_NUMBERS = 1
+ITH_WORD_IN_TEXT = 2
+ITH_CHAR_ON_LINE = 3
 #UNUSED
 #ICHARINTEXT = 4
 
@@ -120,6 +127,7 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
         return -1
     return index_first_valid_line
 
+
 def clean_word(word):
     """
     returns string with
@@ -137,6 +145,7 @@ def clean_word(word):
             cleaned.append(char)
     return ''.join(cleaned)
 
+
 def is_valid_char(char, in_word_punct):
     """
     checks whether a given character is alphabetical or a valid non-alphabetical character,
@@ -148,9 +157,10 @@ def is_valid_char(char, in_word_punct):
     """
     
     val = ord(char)
-    if (val >= A_LO and val <= z_LO) or (val >= A_UP and val <= Z_UP) or char in in_word_punct:
+    if (val >= A_LO and val <= Z_LO) or (val >= A_UP and val <= Z_UP) or char in in_word_punct:
         return True
     return False
+
 
 def print_instructions():
     """
@@ -163,6 +173,7 @@ def print_instructions():
      the previous and next instance of a word\n\
     -qa to display the commands again\n\
     -0 to quit\n")
+
 
 def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     """
@@ -205,9 +216,9 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
                 (to step to the previous or the next instance) is entered, but the default choice is now '>'
     """
     
-    line_nums   = word_analysis[LINENUMBERS]
-    word_i      = word_analysis[IWORDINTEXT]
-    pos_on_line = word_analysis[ICHARONLINE] 
+    line_nums   = word_analysis[LINE_NUMBERS]
+    word_i      = word_analysis[ITH_WORD_IN_TEXT]
+    pos_on_line = word_analysis[ITH_CHAR_ON_LINE] 
 
     #track current line
     current_line = starting_line
@@ -276,7 +287,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
                 print("words skipped forwards: " + str(word_i[w_inst_index] - word_i[w_inst_index - 1] - 1))
             elif choice == W_PREV_INST:
                 print("words skipped backwards: " + str(word_i[w_inst_index + 1] - word_i[w_inst_index] - 1))
-            elif choice == NOMOVE:
+            elif choice == NO_MOVE:
                 print("First instance reached")
 
         legal_command = True
@@ -314,7 +325,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
             #reset word index and line start positions to beginning of current line
             else:
                 #dummy command
-                choice = NOMOVE
+                choice = NO_MOVE
         
         #enter, exit word_step and proceed to the next line
         elif choice == ENTER:
@@ -336,7 +347,6 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     #if the end of the file has been reached, return 0 0 to text_step (0 is the command to exist text_step)
     print("End of file reached at L" + str(current_line) + '\n')
     return 0, 0
-
 
 def text_step(text_as_lines, word_analysis):
     """
@@ -475,16 +485,16 @@ def text_step(text_as_lines, word_analysis):
 #True if function call is the first one of the current session
 text_step.first_time = True
 
-def calc_word_analysis(
-text_file,
-choices_dict,
-max_len=0, 
-trivial=1, trivial_list=[], 
-gender=0, gender_terms=[], 
-mood=0, mood_terms=[], 
-in_word_punct={"'", '-', u"’"},
-eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]}
-):
+def calc_word_analysis(text_file, choices_dict,
+                       max_len=0, 
+                       trivial=0, trivial_list=[],
+                       gender=0, gender_terms=[], 
+                       mood=0, mood_terms=[], 
+                       in_word_punct={"'", '-', u"’"},
+                       eq_words={"can't":["can", "not"], 
+                       "cannot":["can", "not"],
+                       "won't":["will", "not"],
+                       "shouldn't":["should", "not"]}):
     """
     calculates word frequencies given a text string,
     can find additional (optional) information, ignore trivial words, ignore words above a certain length,
@@ -734,17 +744,17 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
                         #access the in-progress word data
                         word_data = word_analysis[joined_word]
                         #increment the word frequency count
-                        word_data[WORDCOUNT] += 1
+                        word_data[WORD_COUNT] += 1
                         #append the next valid line number
                         if char == '\n':
-                            word_data[LINENUMBERS].append(line_count-1)
+                            word_data[LINE_NUMBERS].append(line_count-1)
                         else:
-                            word_data[LINENUMBERS].append(line_count)
+                            word_data[LINE_NUMBERS].append(line_count)
                 
                         #append the ith word value for the current instance of the word
-                        word_data[IWORDINTEXT].append(word_i)
+                        word_data[ITH_WORD_IN_TEXT].append(word_i)
                         #append the starting position/index of the current word instance with respect to the current line
-                        word_data[ICHARONLINE].append(pos_on_line)
+                        word_data[ITH_CHAR_ON_LINE].append(pos_on_line)
 
                         #UNUSED
                         #append the starting position/index of the current word instance with respect to the whole text
@@ -802,17 +812,17 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             #access the in-progress word data
             word_data = word_analysis[joined_word]
             #increment the word frequency count
-            word_data[WORDCOUNT] += 1
+            word_data[WORD_COUNT] += 1
             #append the next valid line number
             if char == '\n':
-                word_data[LINENUMBERS].append(line_count-1)
+                word_data[LINE_NUMBERS].append(line_count-1)
             else:
-                word_data[LINENUMBERS].append(line_count)
+                word_data[LINE_NUMBERS].append(line_count)
     
             #append the ith word value for the current instance of the word
-            word_data[IWORDINTEXT].append(word_i)
+            word_data[ITH_WORD_IN_TEXT].append(word_i)
             #append the starting position/index of the current word instance with respect to the current line
-            word_data[ICHARONLINE].append(pos_on_line)
+            word_data[ITH_CHAR_ON_LINE].append(pos_on_line)
 
 
     #append a guard new-line character if the text does not end with a new-line character
@@ -863,7 +873,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #(or the default list if trivial_list is empty)
     if trivial == 0:
         if len(trivial_list) == 0:
-            trivial_list = ['a', 'an', 'the', 'it', 'its', "it's", 'is', 'I', 'you', 'he', 'she', 'we', 'our']
+            trivial_list = ['a', 'an', 'the', 'it', 'its', "it's", 'is', 'I', 
+                            'you', 'he', 'she', 'we', 'our'
+            ]
         temp_dict = {}
         #iterate through the words and copy only non-trivial entries
         for key in word_analysis:
@@ -885,7 +897,7 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
             gender_terms = {
                             "he":'m', "him":'m', "his":'m', "gentleman":'m', 
                             "she":'f', "her":'f', "hers":'f', "lady":'f'
-                            }
+            }
         #iterate through the keys in the word frequency dictionary,
         #increment the count for each masculine or feminine word
         for key in word_analysis:
@@ -900,7 +912,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #percent of text identified as feminine
         gender_stat['%_f'] = (gender_stat['f'] / len(word_analysis))*100
         #percent of text identified as either masculine or feminine
-        gender_stat['%_indentifiable'] = ((gender_stat['m'] + gender_stat['f']) / len(word_analysis))*100
+        gender_stat['%_indentifiable'] = (((gender_stat['m'] + gender_stat['f']) 
+                                         / len(word_analysis))
+                                         *100)
 
         #print(gender_stat)
         # print('gendered\n')
@@ -912,9 +926,10 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #if no list of mood terms specified, the default list is used
         if len(mood_terms) == 0:
             mood_terms = {
-                            "yay":':D', "wonderful":':D', "splendid":':D', "lovely":':D',
-                            "aw":'D:', "terrible":'D:', "horrific":'D:', "unfortunately":'D:'
-                         }
+                            "yay":':D', "wonderful":':D', "splendid":':D', 
+                            "lovely":':D', "aw":'D:', "terrible":'D:', 
+                            "horrific":'D:', "unfortunately":'D:'
+            }
         #iterate through the keys in the word frequency dictionary,
         #increment the count for each happy or sad word
         for key in word_analysis:
@@ -929,7 +944,9 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
         #percent of text identified as sad
         mood_stat['%_D:'] = (mood_stat['D:'] / len(word_analysis))*100
         #percent of text identified as either happy or sad
-        mood_stat['%_indentifiable'] = ((mood_stat[':D'] + mood_stat['D:']) / len(word_analysis))*100
+        mood_stat['%_indentifiable'] = (((mood_stat[':D'] + mood_stat['D:']) 
+                                       / len(word_analysis))
+                                       *100)
 
         #print(mood_stat)
         #print('mooded\n')
@@ -952,25 +969,59 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #return the analysis dictionary
     return analysis_dict
 
-def configure():
+
+def open_text(default_directory=True):
+    """
+    opens a file for reading
+    
+    return: file descriptor (for open file)
+    """
+    
+    if default_directory:
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    
+    # ask to change directory or not
+    
+    # otherwise proceed
+
+
+
+def configure(default=True):
     """
     choose settings for analysis
 
     returns the list of choices made
     """
+    
+    #list of default on and off choices for calc_word_frequency function
+    choices_defaults = [0, 0, 0, 0]
+    if default:
+        return choices_defaults
+    
+    input_incomplete = True
+    # set text analysis options to default or configure them
+    while input_incomplete:
+        option = input("Set all to default? (enter or 1/0): ")
+        if option == ENTER or option == '1':
+            return choices_defaults
+        elif option == '0':
+            input_incomplete = False
+        else:
+            print("Please choose a valid option.\n")
+
     # list of option strings for prompt, answers to questions stored as 1 or 0 in choices_list
     prompt_list = [            
-                    "Specify a maximum word length? (enter for default, 0 for no limit or a positive number) ", 
+                    "Specify a maximum word length? "
+                    "(enter for default, 0 for no limit or a positive number) ", 
                     "Include trivial words? (enter for default or 1/0) ", 
                     "Analyze gender? (enter for default or 1/0) ", 
                     "Analyze mood? (enter for default or 1/0) "
-                    ]
+    ]
     
-    #list of default on/off choices for calc_w_frequency function
-    choices_list = [0, 0, 0, 0]
-    choices_keys = ["max_len", "list_trivial", "gender", "mood"]
-    choices_defaults = [0, 0, 0, 0] 
-    choices_dict = {}
+    choices_list     = [0, 0, 0, 0]
+    choices_keys     = ["max_len", "list_trivial", "gender", "mood"]
+    choices_dict     = {}
+
     
     #cycle through options in prompt,
     #set all settings by updating the values in choice_list according to the user's choices
@@ -1003,7 +1054,7 @@ def configure():
                     choices_dict[choice_key] = choice_as_int # <------------
             else:
                 print("Please select a valid option\n")
-        
+                
         count += 1
         
         
@@ -1013,116 +1064,24 @@ def configure():
 
     #return the updated list of choices
     return choices_list
-    
-def set_start_directory(arg=None):
-    """
-    set the working directory in which desired input files are located
-    
-    param:
-        string arg=None (by default program not given arguments, but if an arg is given, it should be the absolute path name)
-    """
-    
-    print("Default directory:\n" + os.getcwd()) 
-    input_incomplete = True 
-    if arg:
-        try:
-            os.chdir(arg)
-        except:
-            print("Directory invalid, please choose a valid directory\n")
-        else:
-            input_incomplete = False
-    
-    while input_incomplete:
-        option = input("\nSpecify a working directory:\n\
-        Selection Options:\n\
-        \tPress enter for the default directory\n\
-        \tThe full path\n\
-        \tcd <path> to change directory\n\
-        \t0 to exit the program\n")
-        
-        if option == ENTER:
-            try:
-                os.chdir(os.path.dirname(os.path.realpath(__file__)))
-            except:
-                print("ERROR, directory not found, try again")
-            else:
-                input_incomplete = False
-        elif option == '0':
-            sys.exit(0)
-        else:
-            if len(option) > 3 and option[:3] == "cd ":
-                option = option[3:]
-            try:
-                os.chdir(option)
-            except:
-                print("Directory invalid, please choose a valid directory\n")
-            else:
-                input_incomplete = False
-        
-    print("Currently in: " + os.getcwd())
 
-def output_analysis_dict(analysis_dict, choices_dict):
-    """
-    displays desired information in analysis dictionary
-    param:
-        dictionary analysis_dict (the text analysis dictionary containing information to print)
-        dictionary choices_dict choices (specifies which items in the dictionary are valid for printing)
-    """
-    
-    # TODO <------------------------------
-    
 
-"""""""""""""""""""""
-MAIN
-"""""""""""""""""""""
-def main():
-
+def open_text():
     """
-    USER OPTIONS:
-    set / confirm directory, function options, and file - default options available
+    Open a file for reading
+    
+    return:
+        file descriptor for reading
     """
-    
-    # TODO
-    # choices_dict = {} <----------------------
-    
-    
-    choices_list = []
-    input_incomplete = True
-    
-    print("STARTING")
-
-    # set the working directory
-    if len(sys.argv) > 1:
-        set_start_directory(sys.argv[1])
-    else:
-        set_start_directory()
-    
-    # set text analysis options to default or configure them
-    while input_incomplete:
-        option = input("Set all to default? (enter or 1/0): ")
-        if option == ENTER or option == '1':
-            choices_list.extend([1,0,1,1,1])
-        elif option == '0':
-            choices_list.extend(configure())
-        else:
-            print("Please choose a valid option.\n")
-            continue
-        input_incomplete = False
-
-    sys.exit("WEE") # <-- temp
-    """
-    FILE SELECTION, OPEN FILE FOR READING
-    """
-
-    # stores the input text file
-    text_file = ''
     
     # option/loop checks
     try_new_file = False
     choose_file = True
     
     # file selection prompt
-    option = input("Enter '1' or the enter key to choose a file,\notherwise enter '0' or another key to choose the default file (must be named 'default.txt'): ")
+    option = input("Enter '1' or the enter key to choose a file,\n"
+                   "otherwise enter '0' or another key to choose the "
+                   "default file (must be named 'default.txt'): ")
 
     # default file selection
     if option != ENTER and option != '1':
@@ -1152,11 +1111,17 @@ def main():
         if try_new_file:
             option = ''
         else:
-            option = input("Would you like to try a different file? (enter or 1/0 or any other entry): ")
+            option = input("Would you like to try a different file? "
+            "(enter or 1/0 or any other entry): ")
 
         if option == '' or option == '1':
-            option = input("Enter the index of a file in the current working directory: ")
-            encoding_ = input("Enter the encoding of the file, (enter or 1 for ascii default), (2 for utf-8), (3 for mac-roman), specify otherwise: ") 
+            option = input("Enter the index of a file in the current working "
+                           "directory: ")
+            encoding_ = input("Enter the encoding of the file"
+                             "(enter or 1 for ascii default), "
+                             "(2 for utf-8), "
+                             "(3 for mac-roman), "
+                             "specify otherwise: ") 
             if encoding_ == '' or encoding_ == '1':
                 encoding_ = "ascii"
             elif encoding_ == '2':
@@ -1164,7 +1129,8 @@ def main():
             elif encoding_ == '3':
                 encoding_ = "mac-roman"
             try:
-                text_file = open(file_options[int(option)], 'r', encoding=encoding_)
+                text_file = open(file_options[int(option)], 
+                'r', encoding=encoding_)
             except:
                 print("ERROR: unable to open the file\n")
             else:
@@ -1172,11 +1138,88 @@ def main():
         else:
             sys.exit("quitting")
         try_new_file = False
+        
+        
+        return text_file
 
-    # try to read the text file
+
+def change_directory():
+    """
+    separates change directory functionality from default path selection
+    """
+    
+    while True:
+        try:
+            print("Currently in {:}".format(os.getcwd()))
+            option = input("Options:\n\tcd <path> to change directory\n"
+                           "\th for home directory\n"
+                           "\tenter for current directory\n"
+                           "\t0 to quit\n").strip()
+                           
+            if option == ENTER:
+                return
+            elif option == 'h':
+                os.chdir(PROGRAM_HOME)
+            elif option.startswith("cd "):
+                os.chdir(option[3:].strip())
+            elif option == "0":
+                break
+            else:
+                raise Exception("INVALID option")
+        except:
+            print("ERROR, directory not found\n")
+            
+    sys.exit("Goodbye!")
+
+def output_analysis_dict(analysis_dict, choices_dict):
+    """
+    displays desired information in analysis dictionary
+    param:
+        dictionary analysis_dict 
+            (the text analysis dictionary containing information to print)
+        dictionary choices_dict choices 
+            (specifies which items in the dictionary are valid for printing)
+    """
+    
+    # TODO <------------------------------
+
+
+"""
+MAIN
+"""
+def main():
+    """
+    USER OPTIONS:
+    set or confirm directory, 
+    set function options, 
+    set file 
+    - default options available
+    """
+    
+    print(PROGRAM_BANNER, end='')
+    
+    # set options
+    choices_list = configure()
+    
+    change_directory()
+    
+    print("Currently in {:}".format(os.getcwd()))
+
+    sys.exit("WEE")
+    
+    # file selection
+    text_file = open_text()
+    
     try:
         # call calc_w_analysis() and save the analysis list that it returns
-        analysis_dict = calc_word_analysis(text_file, None, choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+        analysis_dict = calc_word_analysis(text_file, None, 
+                                           choices_list[0], 
+                                           choices_list[1], 
+                                           [], 
+                                           choices_list[2], 
+                                           [], 
+                                           choices_list[3], 
+                                           [])
     except:
         sys.exit("ERROR: cannot read file")
 
@@ -1216,7 +1259,7 @@ def main():
     format_start = '{:<' + str(len_longest) + '} {:>'
     # format words and counts nicely
     for word in sorted(word_analysis.keys()):
-        count = word_analysis[word][WORDCOUNT]
+        count = word_analysis[word][WORD_COUNT]
 
         print(str( format_start + str(len(str(count))) + '}').format(word, count))
         
@@ -1232,7 +1275,8 @@ def main():
         print("////Gender Information////\n\n")
         gender_stat = analysis_dict["gender stat"]
     
-        print("number of words identified as masculine: " + str(gender_stat['m']) + '\n')
+        print("number of words identified as masculine: " 
+              + str(gender_stat['m']) + '\n')
         print("percent of text identified as masculine: " + str(gender_stat['%_m']) + '\n')
         print("number of words identified as feminine: " + str(gender_stat['f']) + '\n')
         print("percent of text identified as feminine:  " + str(gender_stat['%_f']) + '\n')
