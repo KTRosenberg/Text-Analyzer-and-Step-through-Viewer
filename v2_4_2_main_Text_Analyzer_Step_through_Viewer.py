@@ -11,7 +11,7 @@ ENTER = ''
 W_NEXT_INST = '>'
 W_PREV_INST = '<'
 INSTRUCTIONS = 'qa'
-YES = NEXT_LINE = 1
+YES = NEXT_LINE = DEFAULT = 1
 NO = QUIT = FIRST = 0
 NOMOVE = -1
 
@@ -475,15 +475,15 @@ def text_step(text_as_lines, word_analysis):
 #True if function call is the first one of the current session
 text_step.first_time = True
 
-def calc_w_analysis(
-text_file, 
+def calc_word_analysis(
+text_file,
+choices_dict,
 max_len=0, 
 trivial=1, trivial_list=[], 
 gender=0, gender_terms=[], 
 mood=0, mood_terms=[], 
 in_word_punct={"'", '-', u"’"},
-eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]},
-
+eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]}
 ):
     """
     calculates word frequencies given a text string,
@@ -960,17 +960,17 @@ def configure():
     """
     # list of option strings for prompt, answers to questions stored as 1 or 0 in choices_list
     prompt_list = [            
-                    "Clean text? (enter or 1/0) ",
-                    "Specify a maximum word length? (enter 0 for no limit or a positive number) ", 
-                    "Include trivial words? (enter or 1/0) ", 
-                    "Analyze gender? (enter or 1/0) ", 
-                    "Analyze mood? (enter or 1/0) "
+                    "Specify a maximum word length? (enter for default, 0 for no limit or a positive number) ", 
+                    "Include trivial words? (enter for default or 1/0) ", 
+                    "Analyze gender? (enter for default or 1/0) ", 
+                    "Analyze mood? (enter for default or 1/0) "
                     ]
     
     #list of default on/off choices for calc_w_frequency function
-    choices_list = [0, 0, 0, 0, 0]
-    choices_keys = ["clean", "max_len", "list_trivial", "gender", "mood"]
-    choices_set = {}
+    choices_list = [0, 0, 0, 0]
+    choices_keys = ["max_len", "list_trivial", "gender", "mood"]
+    choices_defaults = [0, 0, 0, 0] 
+    choices_dict = {}
     
     #cycle through options in prompt,
     #set all settings by updating the values in choice_list according to the user's choices
@@ -981,26 +981,40 @@ def configure():
         while valid_choice == False:
             choice = input(option).lower()
             if choice == ENTER:
-                choices_list[count] = 1                
+                choices_list[count] = choices_defaults[count]
                 valid_choice = True
                 
-                choices_set.add(choice_key) # <------------
+                choices_dict[choice_key] = choices_defaults[count]
             elif choice.isdigit():
-                choices_list[count] = int(choice)
+                try:
+                    choice_as_int = int(choice)
+                except ValueError:
+                    print("Please select a valid option\n")
+                    continue
+                else: 
+                    if choice_as_int < 0:
+                        print("Please select a valid option\n")
+                        continue
+
                 valid_choice = True
                 
-                if choice == '1':
-                    choices_set.add(choice_key) # <------------
+                choices_list[count] = choice_as_int
+                if choice :
+                    choices_dict[choice_key] = choice_as_int # <------------
             else:
                 print("Please select a valid option\n")
         
-        choices_set.add(choice_key) # <------------
         count += 1
+        
+        
+    print(choices_dict)
+    print(choices_list)
+
 
     #return the updated list of choices
     return choices_list
     
-def set_directory(arg=None):
+def set_start_directory(arg=None):
     """
     set the working directory in which desired input files are located
     
@@ -1008,8 +1022,7 @@ def set_directory(arg=None):
         string arg=None (by default program not given arguments, but if an arg is given, it should be the absolute path name)
     """
     
-    ENTER = ''
-
+    print("Default directory:\n" + os.getcwd()) 
     input_incomplete = True 
     if arg:
         try:
@@ -1020,23 +1033,33 @@ def set_directory(arg=None):
             input_incomplete = False
     
     while input_incomplete:
-        option = input("\nSpecify a working directory:\nSelection Options:\n\tPress enter for the default directory\n\tThe full path\n\tcd <path> to change directory\n\t0 to exit the program")
+        option = input("\nSpecify a working directory:\n\
+        Selection Options:\n\
+        \tPress enter for the default directory\n\
+        \tThe full path\n\
+        \tcd <path> to change directory\n\
+        \t0 to exit the program\n")
+        
         if option == ENTER:
             try:
                 os.chdir(os.path.dirname(os.path.realpath(__file__)))
             except:
                 print("ERROR, directory not found, try again")
+            else:
+                input_incomplete = False
         elif option == '0':
             sys.exit(0)
         else:
             if len(option) > 3 and option[:3] == "cd ":
-                option = option[:3]
+                option = option[3:]
             try:
                 os.chdir(option)
             except:
                 print("Directory invalid, please choose a valid directory\n")
+            else:
+                input_incomplete = False
         
-    print(os.getcwd())
+    print("Currently in: " + os.getcwd())
 
 def output_analysis_dict(analysis_dict, choices_dict):
     """
@@ -1069,10 +1092,10 @@ def main():
     print("STARTING")
 
     # set the working directory
-    if len(sys.argv) > 2:
-        set_directory(sys.argv[1])
+    if len(sys.argv) > 1:
+        set_start_directory(sys.argv[1])
     else:
-        set_directory()
+        set_start_directory()
     
     # set text analysis options to default or configure them
     while input_incomplete:
@@ -1153,7 +1176,7 @@ def main():
     # try to read the text file
     try:
         # call calc_w_analysis() and save the analysis list that it returns
-        analysis_dict = calc_w_analysis(text_file, choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+        analysis_dict = calc_word_analysis(text_file, None, choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
     except:
         sys.exit("ERROR: cannot read file")
 
