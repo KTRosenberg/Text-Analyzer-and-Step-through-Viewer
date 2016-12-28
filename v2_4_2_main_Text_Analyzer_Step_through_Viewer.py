@@ -1382,7 +1382,7 @@ def main():
         
     choose_file = True
     while choose_file:
-        # cycle through file arguments, if exist
+        # cycle through file arguments, if any exist
         if f_info > 0 and f_info <= num_info_args:
             print("Selecting file from input list")
             text_file = open_text_file((sys.argv[f_info],sys.argv[f_info+1]))
