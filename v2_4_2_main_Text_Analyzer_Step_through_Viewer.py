@@ -4,50 +4,17 @@ import sys
 import os
 import time
 
-# module-level constants:
-
-PROGRAM_BANNER = ("+============================================+\n"
-                  "| Welcome!                                   |\n"
-                  "+============================================+\n")
-                  
-# directory of the program file
-PROGRAM_HOME = os.path.dirname(os.path.realpath(__file__))
-
-# for user input options in text_step and word_step functions
-ENTER = ''
-W_NEXT_INST = '>'
-W_PREV_INST = '<'
-INSTRUCTIONS = 'qa'
-YES = NEXT_LINE = DEFAULT = 1
-NO = QUIT = FIRST = 0
-NO_MOVE = -1
-
-# for accessing word_analysis list
-WORD_COUNT   = 0
-LINE_NUMBERS = 1
-ITH_WORD_IN_TEXT = 2
-ITH_CHAR_ON_LINE = 3
-#UNUSED
-#ICHARINTEXT = 4
-
-#ASCII values for alphabetic characters 
-A_LO = 65
-Z_LO = 90
-A_UP = 97
-Z_UP = 122
-
 """
-Karl Toby Rosenberg
-
-Text Analyzer (word counts, number of words between instances of a given word) 
-and Text Viewer
+Step-through Text and Word Viewer 
 ver 2.x
+December 2016
 
-Utility to look into distances between instances of a word while viewing / moving through the text
+Author: Karl Toby Rosenberg
 
--Dictionary and Word Frequency
+Utility to look into distances between instances of a word while viewing and
+moving through the text
 
--Step-through-text-viewer:
+Notes on functionality
     Steps through text x lines at a time (1 by default), displays line number
     jumps to specific lines,
     skips to specific instances of a chosen word 
@@ -66,15 +33,49 @@ Utility to look into distances between instances of a word while viewing / movin
     mood/gender word counts possible
     to-do: implement way for the user to specify the 
     mood/gender/trivial words and replace the default placeholder lists
-
 """
+
+# module-level constants:
+
+PROGRAM_BANNER = ("+============================================+\n"
+                  "| Welcome!                                   |\n"
+                  "+============================================+\n")
+                  
+# directory of the program file
+PROGRAM_HOME = os.path.dirname(os.path.realpath(__file__))
+
+# for user input options in text_step and word_step functions
+ENTER = ''
+W_NEXT_INST = '>'
+W_PREV_INST = '<'
+INSTRUCTIONS = set(['qa', "help"])
+YES = NEXT_LINE = DEFAULT = 1
+NO = QUIT = FIRST = 0
+NO_MOVE = -1
+
+# for accessing word_analysis list
+WORD_COUNT   = 0
+LINE_NUMBERS = 1
+ITH_WORD_IN_TEXT = 2
+ITH_CHAR_ON_LINE = 3
+#UNUSED
+#ICHARINTEXT = 4
+
+#ASCII values for alphabetic characters 
+A_LO = 65
+Z_LO = 90
+A_UP = 97
+Z_UP = 122
+
+
 #############################
 
 
 def binary_min_line_above_search(line_numbers, low, high, starting_line):
     """
     given a starting line number and a list of valid line numbers,
-    finds and returns the index of the nearest line number greater or equal to the starting line
+    finds and returns the index of the nearest line number greater or 
+    equal to the starting line
     returns -1 if there is no such valid line in the correct range
     """
     mid = 0
@@ -98,11 +99,12 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
     if line_numbers[index_first_valid_line] < starting_line:
         return -1
     return index_first_valid_line
-
+    
 def binary_max_line_below_search(line_numbers, low, high, starting_line):
     """
     given a starting line number and a list of valid line numbers,
-    finds and returns the index of the nearest line number less than or equal to the starting line
+    finds and returns the index of the nearest line number less than or 
+    equal to the starting line
     returns -1 if there is no such valid line in the correct range
     """
     mid = 0
@@ -126,8 +128,8 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
     if line_numbers[index_first_valid_line] > starting_line:
         return -1
     return index_first_valid_line
-
-
+    
+    
 def clean_word(word):
     """
     returns string with
@@ -144,8 +146,8 @@ def clean_word(word):
         if (cmp >= A_LO and cmp <= Z_LO) or (cmp >= A_UP and cmp <= Z_UP):
             cleaned.append(char)
     return ''.join(cleaned)
-
-
+    
+    
 def is_valid_char(char, in_word_punct):
     """
     checks whether a given character is alphabetical or a valid non-alphabetical character,
@@ -160,21 +162,22 @@ def is_valid_char(char, in_word_punct):
     if (val >= A_LO and val <= Z_LO) or (val >= A_UP and val <= Z_UP) or char in in_word_punct:
         return True
     return False
-
-
+    
+    
 def print_instructions():
     """
     displays the commands for text_step and word_step functions
     """
-    print("TEXT STEP COMMANDS:\n\
-    -enter a number n to step by n lines\n\
-    -a number -n to skip to a specific line number\n\
-    -the < and > character keys to skip to\n\
-     the previous and next instance of a word\n\
-    -qa to display the commands again\n\
-    -0 to quit\n")
-
-
+    print("TEXT STEP COMMANDS:\n"
+          "    -enter a number n to step by n lines\n"
+          "    -a number -n to skip to a specific line number\n"
+          "    -the < and > character keys to skip to\n"
+          "         the previous or next instance of a word\n"
+          "    -qa to display the commands again\n"
+          "    -0 to quit\n"
+          "--------------------------------------------------")
+    
+    
 def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     """
     skips to instances of the chosen word within the text,
@@ -332,7 +335,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
             #return a step of 1 (move to next line) and the current line number
             return 1, current_line
         #display instructions
-        elif choice == INSTRUCTIONS:
+        elif choice in INSTRUCTIONS:
             print_instructions()
         else: 
             #if the command is a valid integer,
@@ -343,11 +346,12 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
             #continue and prompt for input again
             except:
                 legal_command = False
+                print("INVALID command")
                 continue
     #if the end of the file has been reached, return 0 0 to text_step (0 is the command to exist text_step)
     print("End of file reached at L" + str(current_line) + '\n')
     return 0, 0
-
+    
 def text_step(text_as_lines, word_analysis):
     """
     step-through lines in the text,
@@ -454,7 +458,7 @@ def text_step(text_as_lines, word_analysis):
                         step = 1
                         break
                     #display the instructions
-                    elif step == INSTRUCTIONS:
+                    elif step in INSTRUCTIONS:
                         print_instructions()
                         continue
                     #otherwise interpret the command as an integer
@@ -476,7 +480,7 @@ def text_step(text_as_lines, word_analysis):
                         return QUIT
                 #upon an exception, continue the loop and prompt for a new command
                 except:
-                    print("ERROR")
+                    print("INVALID command")
                     continue
     #before returning from the function, display the final line number if the end of the final has been reached
     print("End of file reached at L" + str(current_line_l) + '\n')
@@ -485,53 +489,48 @@ def text_step(text_as_lines, word_analysis):
 #True if function call is the first one of the current session
 text_step.first_time = True
 
-def calc_word_analysis(text_file, choices_dict,
-                       max_len=0, 
-                       trivial=0, trivial_list=[],
-                       gender=0, gender_terms=[], 
-                       mood=0, mood_terms=[], 
-                       in_word_punct={"'", '-', u"’"},
+def calc_word_analysis(text_file, 
+                       in_word_punct=frozenset(["'", '-', u"’"]),
                        eq_words={"can't":["can", "not"], 
-                       "cannot":["can", "not"],
-                       "won't":["will", "not"],
-                       "shouldn't":["should", "not"]}):
+                                 "cannot":["can", "not"],
+                                 "won't":["will", "not"],
+                                 "shouldn't":["should", "not"]
+                       }):
     """
     calculates word frequencies given a text string,
-    can find additional (optional) information, ignore trivial words, ignore words above a certain length,
+    can find additional (optional) information, ignore trivial words,
+    ignore words above a certain length,
     other possibilities are a work-in-progress
 
     param: file text_file (the file object representing the chosen text)
-    optional params: pass 1 or 0 to specify option, or specify a list of words for a list parameter
-        max_len: omit words of length greater than max_len
-        trivial: omit trivial words
-        trivial_list: specifies a list of trivial words
-        gender: count words with male or female qualities, 
-            stores another dictionary in list of dictionaries returned from function,
-            contains counts and percentages for male and female,
-        gender_terms: specifies a list of gender words
-        mood: count words with happy or sad qualities
-            stores another dictionary in list of dictionaries returned from function,
-            contains counts and percentages for happy and sad
-        mood_terms: specifies a list of happy or sad words
-        in_word_punct: set of acceptable in-word punctuation
-    
+           frozenset in_word_punct 
+               (set of punctuation and marks used as part of words)
+           dictionary eq_words (dictionary of words to consider as 
+                                    other words or combinations of words
     return: 
-        dictionary analysis_dict of word_analysis dictionary and optional dictionaries
+        dictionary analysis_dict 
+        (of word_analysis dictionary and optional dictionaries)
                                 (access with analysis_dict["word analysis"]
-            list, word_analysis: (access with analysis_dict["word analysis"])
-                information pertaining to a specific word in the text:
-                word_analysis[0]:
+            list word_analysis: (access with analysis_dict["word analysis"])
+                information pertaining to a specific word in the text,
+                access with analysis_dict["word analysis"]
+                word_analysis[0]: (word_analysis[WORD_COUNT])
                     int (number of instances of the given word in the text)
-                word_analysis[1]:
+                word_analysis[1]: (word_analysis[LINE_NUMBERS])
                     list of int (for each instance of the given word,
-                    stores--in order--the line numbers on which the word occurred)
-                word_analysis[2]:
-                    list of int (understand the entire text as a list of words, where word i is the ith word in the text,
-                    this list stores the word index i for each instance of the given word
-                word_analysis[3]:
-                    list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
-                    this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
-                    list with word_analysis[1])
+                    stores--in order--the line numbers where the word exists)
+                word_analysis[2]: (word_analysis[ITH_WORD_IN_TEXT])
+                    list of int (understand the entire text as a list of words, 
+                        where word i is the ith word in the text,
+                        this list stores the word index i for each instance of 
+                        the given word)
+                word_analysis[3]: (word_analysis[ITH_CHAR_ON_LINE])
+                    list of int (understand the entire text as a list of strings 
+                        where each string is a line in the text with indices 
+                        0-length_of_line-1,
+                        this list stores the index of the first character of 
+                        the given word for each instance of the word, 
+                        with respect to its line.
 
                 word_analysis   :   [
                                         1, 
@@ -542,13 +541,13 @@ def calc_word_analysis(text_file, choices_dict,
 
                 UNUSED/UNCALCULATED:    
                     word_analysis[4]:
-                        list of int (understand the entire text as a single string with indices 0-length_of_text-1,
+                        list of int (interpret the entire text as a single string with indices 0-length_of_text-1,
                         this list stores the index of the first character of the given word for each instance of the word)
         
-            list, text_as_lines: (access with analysis_dict["text as lines"])
+            list text_as_lines: (access with analysis_dict["text as lines"])
                 the entire input text divided into lines,
                 where line i is stored in text_as_lines[i-1]
-            word list: (access with analysis_dict["word list"]
+            word list: (access with analysis_dict["word list"])
                 access list of words with analysis_dict[1]
 
             other work-in-progress options:
@@ -571,18 +570,17 @@ def calc_word_analysis(text_file, choices_dict,
     word_list = []
 
     #dictionary of gender word counts (-1 counts if unused)
-    gender_stat = {'m':-1, 'f':-1}
+    # gender_stat = {'m':-1, 'f':-1}
     #dictionary of mood stat counts (-1 counts if unused)
-    mood_stat = {':D':-1, 'D:':-1}
+    # mood_stat = {':D':-1, 'D:':-1}
     
     #save reference to word_list.append
-    word_list_append = word_list.append
+    word_list_append_ = word_list.append
     #save reference to str.lower()
     lower_ = str.lower
     #save reference to str.isalpha()
-    isalpha_ = str.isalpha 
-
-       
+    isalpha_ = str.isalpha
+    
     #create a new list to store each character to be combined into a word
     new_word = []
     #save reference to new_word.append
@@ -736,7 +734,7 @@ def calc_word_analysis(text_file, choices_dict,
                                                             ]
 
                         #add new word to word list
-                        word_list_append(joined_word)
+                        word_list_append_(joined_word)
             
                     #else if the new word has already been added to the dictionary,
                     #increment the frequency count and other information for that word
@@ -804,7 +802,7 @@ def calc_word_analysis(text_file, choices_dict,
                                                 ]
 
             #add new word to word list
-            word_list_append(joined_word)
+            word_list_append_(joined_word)
 
         #else if the new word has already been added to the dictionary,
         #increment the frequency count and other information for that word
@@ -836,7 +834,7 @@ def calc_word_analysis(text_file, choices_dict,
     else:
         text_as_lines_append_('\n')
 
-
+    """
     ####################################
 
     #if no words, return early
@@ -847,11 +845,14 @@ def calc_word_analysis(text_file, choices_dict,
         #word list
         analysis_dict["word list"] = word_list
         #gender statistics
-        analysis_dict["gender stat"] = gender_stat
+        # analysis_dict["gender stat"] = gender_stat
         #mood statistics
-        analysis_dict["mood stat"] = mood_stat
+        # analysis_dict["mood stat"] = mood_stat
         return analysis_dict
-
+    """
+    
+    """
+    
     #if a maximum word length is set,
     #overwrite the word_analysis dictionary with a dictionary that
     #omits words of length greater than max_len
@@ -952,46 +953,30 @@ def calc_word_analysis(text_file, choices_dict,
         #print('mooded\n')
 
     #add specific dictionaries to the analysis dictionary for output
-
+    """
     #word analysis
 
     analysis_dict["word analysis"] = word_analysis
     #text divided into a list of lines
     analysis_dict["text as lines"] = text_as_lines
     #word list
-    print("LEN\n\n\n\n: ", len(word_list))
+    # print("LEN\n\n\n\n: ", len(word_list))
     analysis_dict["word list"] = word_list
     #gender statistics
-    analysis_dict["gender stat"] = gender_stat
+    # analysis_dict["gender stat"] = gender_stat
     #mood statistics
-    analysis_dict["mood stat"] = mood_stat
+    # analysis_dict["mood stat"] = mood_stat
     
     #return the analysis dictionary
     return analysis_dict
-
-
-def open_text(default_directory=True):
-    """
-    opens a file for reading
     
-    return: file descriptor (for open file)
-    """
-    
-    if default_directory:
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    
-    # ask to change directory or not
-    
-    # otherwise proceed
-
-
-
+"""  OLD  
 def configure(default=True):
-    """
+    \"""
     choose settings for analysis
 
     returns the list of choices made
-    """
+    \"""
     
     #list of default on and off choices for calc_word_frequency function
     choices_defaults = [0, 0, 0, 0]
@@ -1018,7 +1003,6 @@ def configure(default=True):
                     "Analyze mood? (enter for default or 1/0) "
     ]
     
-    choices_list     = [0, 0, 0, 0]
     choices_keys     = ["max_len", "list_trivial", "gender", "mood"]
     choices_dict     = {}
 
@@ -1032,7 +1016,6 @@ def configure(default=True):
         while valid_choice == False:
             choice = input(option).lower()
             if choice == ENTER:
-                choices_list[count] = choices_defaults[count]
                 valid_choice = True
                 
                 choices_dict[choice_key] = choices_defaults[count]
@@ -1049,8 +1032,7 @@ def configure(default=True):
 
                 valid_choice = True
                 
-                choices_list[count] = choice_as_int
-                if choice :
+                if choice:
                     choices_dict[choice_key] = choice_as_int # <------------
             else:
                 print("Please select a valid option\n")
@@ -1061,11 +1043,29 @@ def configure(default=True):
     print(choices_dict)
     print(choices_list)
 
-
     #return the updated list of choices
     return choices_list
+"""
 
-
+def get_files(display=False):
+    """
+    walk the current directory and display all files
+    
+    return list file_options (list of file info)
+    """
+    file_options = next(os.walk(os.getcwd()))[2]
+    
+    if display:
+        print("\nFILES:\n")
+        count = 0
+        for file_name in file_options:
+            print(str(count) + ' ' + file_name)
+            count += 1
+        print("\n")
+    
+    return file_options
+    
+    
 def open_text():
     """
     Open a file for reading
@@ -1074,118 +1074,142 @@ def open_text():
         file descriptor for reading
     """
     
-    # option/loop checks
-    try_new_file = False
-    choose_file = True
-    
-    # file selection prompt
-    option = input("Enter '1' or the enter key to choose a file,\n"
-                   "otherwise enter '0' or another key to choose the "
-                   "default file (must be named 'default.txt'): ")
-
-    # default file selection
-    if option != ENTER and option != '1':
-        try:
-            text_file = open("default.txt", 'r')
-            choose_file = False
-        except:
-            print("Unable to open the default file, please specify a file:")
-            choose_file = True
-            time.sleep(1)
-    else:
-        try_new_file = True
-
-    if choose_file:
-        # display files in current directory
-        print("\nFILES:\n")
-        file_options = next(os.walk(os.getcwd()))[2]
-        count = 0
-        for file_name in file_options:
-            print(str(count) + ' ' + file_name)
-            count += 1
-        print("\n")
-    
+    first_prompt = True
     # try to open a file (specified with an index) and its encoding
-    while choose_file:
-
-        if try_new_file:
-            option = ''
+    while True:
+        # display files in current directory
+        if first_prompt:
+            file_options = get_files(display=True)
+            first_prompt = False
+    
+        option = input("Choose a File:\n"
+                       "Enter the index of a file in the "
+                       "current working directory\n"
+                       "    enter 'cd <path>' to change the working directory\n"
+                       "    enter 'ls' to show the files in the current working "
+                       "directory\n").strip()
+                       
+        if option.startswith("cd"):
+            first_prompt = set_directory(option)
+        elif option.startswith("ls"):
+            file_options = get_files(display=True)
         else:
-            option = input("Would you like to try a different file? "
-            "(enter or 1/0 or any other entry): ")
-
-        if option == '' or option == '1':
-            option = input("Enter the index of a file in the current working "
-                           "directory: ")
-            encoding_ = input("Enter the encoding of the file"
-                             "(enter or 1 for ascii default), "
-                             "(2 for utf-8), "
-                             "(3 for mac-roman), "
-                             "specify otherwise: ") 
-            if encoding_ == '' or encoding_ == '1':
-                encoding_ = "ascii"
-            elif encoding_ == '2':
-                encoding_ = "utf-8"
-            elif encoding_ == '3':
-                encoding_ = "mac-roman"
             try:
-                text_file = open(file_options[int(option)], 
-                'r', encoding=encoding_)
-            except:
-                print("ERROR: unable to open the file\n")
+                index = int(option)
+                if index < 0 or index >= len(file_options):
+                    raise ValueError()
+            except ValueError:
+                print("ERROR: invalid index\n")
             else:
-                choose_file = False
-        else:
-            sys.exit("quitting")
-        try_new_file = False
-        
-        
-        return text_file
+                encoding_ = input("Enter the encoding of the file: "
+                                  "(enter or 1 for ascii default), "
+                                  "(2 for utf-8), "
+                                  "(3 for mac-roman), "
+                                  "specify otherwise: ")
+                if encoding_ == ENTER or encoding_ == '1':
+                    encoding_ = "ascii"
+                elif encoding_ == '2':
+                    encoding_ = "utf-8"
+                elif encoding_ == '3':
+                    encoding_ = "mac-roman"
+                
+                try:
+                    text_file = open(file_options[index], 
+                                     'r', encoding=encoding_)
+                except:
+                    print("ERROR: unable to open the file\n")
+                else:
+                    return text_file
 
 
-def change_directory():
+def set_directory(command=None):
     """
     separates change directory functionality from default path selection
+    
+    param: string path=None (either prompt user first time or use the arg path)
+    
+    return: boolean (whether the directory was changed)
     """
+    prev_wd = os.getcwd()
     
     while True:
         try:
-            print("Currently in {:}".format(os.getcwd()))
-            option = input("Options:\n\tcd <path> to change directory\n"
-                           "\th for home directory\n"
-                           "\tenter for current directory\n"
-                           "\t0 to quit\n").strip()
+            if not command:
+                print("Currently in {:}".format(os.getcwd()))
+                option = input("cd Commands:\n\tcd <path> to change directory\n"
+                               "    h to select the home directory\n"
+                               "    enter to select the current directory\n"
+                               "    ls to list all files\n"
+                               "    0 to quit\n").strip()
+            else:
+                option = command
+                command = None
                            
             if option == ENTER:
-                return
+                return os.getcwd() == prev_wd
             elif option == 'h':
                 os.chdir(PROGRAM_HOME)
             elif option.startswith("cd "):
                 os.chdir(option[3:].strip())
+            elif option.startswith("ls"):
+                get_files(display=True)
             elif option == "0":
                 break
             else:
                 raise Exception("INVALID option")
         except:
+            print(option)
             print("ERROR, directory not found\n")
             
     sys.exit("Goodbye!")
-
-def output_analysis_dict(analysis_dict, choices_dict):
+    
+    
+def output_analysis_dict(analysis_dict, choices_dict=None):
     """
-    displays desired information in analysis dictionary
+    displays desired information based on analysis dictionary
     param:
         dictionary analysis_dict 
             (the text analysis dictionary containing information to print)
-        dictionary choices_dict choices 
+        dictionary choices_dict=None choices 
             (specifies which items in the dictionary are valid for printing)
     """
+    
+    all_words = analysis_dict["word list"]
+    # track the longest word
+    w_longest = []
+    len_longest = 0
+    for w in all_words:
+        if len(w) > len_longest:
+            del w_longest[:]
+            w_longest.append(w)
+            len_longest = len(w)
+        elif len(w) == len_longest:
+            w_longest.append(w)
+        # print(w) <-- to display the words in order of first discovery
+    print('\n\n')
+    
+    # print("////All Word Counts////\n\n")
+
+    word_analysis = analysis_dict["word analysis"]
+    count = 0
+    line_number = 0
+    format_start = '{:<' + str(len_longest) + '} {:>'
+    # format and output each word paired with its count nicely
+    for word in sorted(word_analysis.keys()):
+        count = word_analysis[word][WORD_COUNT]
+        print(str( format_start + str(len(str(count))) + '}').format(word, count))
+        
+    print("\nNumber of unique words found: " + str(len(all_words)) + '\n')
+    if len(w_longest) > 1:
+        print("Longest words: {:} Length in characters: {:d}\n\n".format(w_longest, len_longest))
+    else:
+        print("Longest word: {:} Length in characters: {:d}\n\n".format(w_longest[0], len_longest))
     
     # TODO <------------------------------
 
 
 """
-MAIN
+START
 """
 def main():
     """
@@ -1199,37 +1223,56 @@ def main():
     print(PROGRAM_BANNER, end='')
     
     # set options
-    choices_list = configure()
+    # choices_list = configure()
     
-    change_directory()
+    print("Current working directory: {:}".format(os.getcwd()))
     
-    print("Currently in {:}".format(os.getcwd()))
+    choose_file = True
+    while choose_file:
+        # file selection
+        text_file = open_text()
+        
+        try:
+            # call calc_word_analysis() and save the analysis list that it returns
+            analysis_dict = calc_word_analysis(text_file)
+        except:
+            sys.exit("ERROR: cannot read file")
 
-    sys.exit("WEE")
+        text_file.close()
     
-    # file selection
-    text_file = open_text()
     
-    try:
-        # call calc_w_analysis() and save the analysis list that it returns
-        analysis_dict = calc_word_analysis(text_file, None, 
-                                           choices_list[0], 
-                                           choices_list[1], 
-                                           [], 
-                                           choices_list[2], 
-                                           [], 
-                                           choices_list[3], 
-                                           [])
-    except:
-        sys.exit("ERROR: cannot read file")
+        output_analysis_dict(analysis_dict)
+        
+        print("////TEXT STEP VIEWER////\n")
 
-    text_file.close()
+        word_analysis = analysis_dict["word analysis"]
+        word_list     = analysis_dict["word list"]
+        text_as_lines = analysis_dict["text as lines"]
+
+        prompt = True
+        while prompt:
+            word = input("Please select a word "
+                         "(enter 0 to leave the current file): ").lower()
+            if word == '0':
+                prompt = False
+            elif word in word_list:                
+                text_step(text_as_lines, word_analysis[word])
+            else:
+                print("Error: word cannot be found\n")
+              
+        while not prompt:
+            choice = input("Press enter or 1 to choose a new file, 0 to exit: ")
+            if choice == ENTER or choice == "1":
+                prompt = True
+            elif choice == "0":
+                sys.exit("Goodbye!") 
 
 
     """
-    OUTPUT DISPLAY
+    OUTPUT DISPLAY (TO-REDO/RE-WRITE)
     """
     
+    """
     if len(analysis_dict["word list"]) == 0:
         print("No words\n")
         sys.exit(0)
@@ -1296,22 +1339,8 @@ def main():
     # step through the text and between instances of a chosen word that appears in the text
     # (currently only with a cleaned text)
     if choices_list[0] == 1:
-        print("////Step through Text////\n")
-        prompt = True
-
-        word_analysis = analysis_dict["word analysis"]
-        text_as_lines = analysis_dict["text as lines"]
-        word_list = analysis_dict["word list"]
-
-        while prompt:
-            #print(word_counts)
-            word = input("Please select a word (enter 0 to quit): ").lower()
-            if word == '0':
-                prompt = False
-            elif word in word_list:                
-                text_step(text_as_lines, word_analysis[word])
-            else:
-                print("Error: word cannot be found\n")
+        pass
+    """
     
 # main function
 if __name__ == "__main__":
