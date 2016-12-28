@@ -1065,15 +1065,44 @@ def get_files(display=False):
     
     return file_options
     
+def get_encoding(key):
+    """
+    gets the encoding name string corresponding to the "string as int" key
     
-def open_text():
+    return:
+        string encoding (name of encoding)
+        upon error (invalid key), "ascii" by default
+    """
+    if key == ENTER or key == '1' or key.lower() == "ascii":
+        return "ascii"
+    elif key == '2' or key.lower() == "utf-8":
+        return "utf-8"
+    elif key == '3' or key.lower() == "mac-roman":
+        return "mac-roman"
+    else:
+        return"ascii"
+
+def open_text_file(file_info=None):
     """
     Open a file for reading
     
+    param:
+        string 2-tuple file_info (opt.)
+            (a tuple containing the file name and encoding to try first)
     return:
-        file descriptor for reading
+        file descriptor for reading, None upon error (given file_info)
     """
     
+    if file_info:
+        try:
+            text_file = open(file_info[0], 'r',
+                             encoding=get_encoding(file_info[1]))
+        except:
+            print("ERROR: unable to open the file\n")
+            return None
+        else:
+            return text_file
+        
     first_prompt = True
     # try to open a file (specified with an index) and its encoding
     while True:
@@ -1082,12 +1111,12 @@ def open_text():
             file_options = get_files(display=True)
             first_prompt = False
     
-        option = input("Choose a File:\n"
+        option = input("Select a File:\n"
                        "Enter the index of a file in the "
                        "current working directory\n"
                        "    enter 'cd <path>' to change the working directory\n"
-                       "    enter 'ls' to show the files in the current working "
-                       "directory\n").strip()
+                       "    enter 'ls' to show the files in the current working"
+                       " directory\n").strip()
                        
         if option.startswith("cd"):
             first_prompt = set_directory(option)
@@ -1101,21 +1130,14 @@ def open_text():
             except ValueError:
                 print("ERROR: invalid index\n")
             else:
-                encoding_ = input("Enter the encoding of the file: "
+                encoding_key = input("Enter the encoding of the file: "
                                   "(enter or 1 for ascii default), "
                                   "(2 for utf-8), "
                                   "(3 for mac-roman), "
                                   "specify otherwise: ")
-                if encoding_ == ENTER or encoding_ == '1':
-                    encoding_ = "ascii"
-                elif encoding_ == '2':
-                    encoding_ = "utf-8"
-                elif encoding_ == '3':
-                    encoding_ = "mac-roman"
-                
                 try:
-                    text_file = open(file_options[index], 
-                                     'r', encoding=encoding_)
+                    text_file = open(file_options[index], 'r', 
+                                     encoding=get_encoding(encoding_key))
                 except:
                     print("ERROR: unable to open the file\n")
                 else:
@@ -1207,6 +1229,21 @@ def output_analysis_dict(analysis_dict, choices_dict=None):
     
     # TODO <------------------------------
 
+def get_num_file_info_args():
+    """
+    returns the number of file : encoding pairs specified as command line args
+    
+    return:
+        int num_file_args, 
+        -1 upon error (incorrect number of args)
+        0 if no args
+    """
+    length = len(sys.argv)-1
+    correct_num = length%2 == 0
+    if correct_num:
+        return (length)
+    else:
+        return -1
 
 """
 START
@@ -1227,43 +1264,63 @@ def main():
     
     print("Current working directory: {:}".format(os.getcwd()))
     
+    
+    num_info_args = get_num_file_info_args()
+    f_info = 0
+    if num_info_args > 0:
+        f_info = 1
+    elif num_info_args == 0:
+        f_info = 1
+    else:
+        print("Invalid number of arguments")
+    
     choose_file = True
     while choose_file:
+        # cycle through file arguments, if exist
+        if f_info > 0 and f_info <= num_info_args:
+            print("Selecting file from input list")
+            text_file = open_text_file((sys.argv[f_info],sys.argv[f_info+1]))
+            f_info += 2
+            if not text_file:
+                continue
         # file selection
-        text_file = open_text()
-        
+        else:
+            text_file = open_text_file()
+            
+        success = False
         try:
-            # call calc_word_analysis() and save the analysis list that it returns
+            # call calc_word_analysis(), save the analysis dict that it returns
             analysis_dict = calc_word_analysis(text_file)
+            success = True
         except:
-            sys.exit("ERROR: cannot read file")
+            print("ERROR: cannot read file")
 
         text_file.close()
     
-    
-        output_analysis_dict(analysis_dict)
+        if success:
+            output_analysis_dict(analysis_dict)
         
-        print("////TEXT STEP VIEWER////\n")
+            print("////TEXT STEP VIEWER////\n")
 
-        word_analysis = analysis_dict["word analysis"]
-        word_list     = analysis_dict["word list"]
-        text_as_lines = analysis_dict["text as lines"]
+            word_analysis = analysis_dict["word analysis"]
+            word_list     = analysis_dict["word list"]
+            text_as_lines = analysis_dict["text as lines"]
 
-        prompt = True
+            prompt = True
+            while prompt:
+                word = input("Please select a word "
+                             "(enter 0 to leave the current file): ").lower()
+                if word == '0':
+                    prompt = False
+                elif word in word_list:                
+                    text_step(text_as_lines, word_analysis[word])
+                else:
+                    print("Error: word cannot be found\n")
+        prompt = True     
         while prompt:
-            word = input("Please select a word "
-                         "(enter 0 to leave the current file): ").lower()
-            if word == '0':
-                prompt = False
-            elif word in word_list:                
-                text_step(text_as_lines, word_analysis[word])
-            else:
-                print("Error: word cannot be found\n")
-              
-        while not prompt:
             choice = input("Press enter or 1 to choose a new file, 0 to exit: ")
             if choice == ENTER or choice == "1":
-                prompt = True
+                prompt = False
             elif choice == "0":
                 sys.exit("Goodbye!") 
 
