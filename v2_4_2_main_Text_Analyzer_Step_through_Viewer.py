@@ -1159,11 +1159,11 @@ def get_files(display=False):
     
     if display:
         print("\nFILES:\n")
-        count = 0
+        count = 1
         for file_name in file_options:
             print(str(count) + ' ' + file_name)
             count += 1
-        print("\n")
+        print("--------------------------------------------------")
     
     return file_options
     
@@ -1186,27 +1186,68 @@ def get_encoding(key):
         return"ascii"
         
         
-def open_text_file(file_info=None):
+def get_num_file_info_args():
+    """
+    returns the number of file : encoding pairs specified as command line args
+    
+    return:
+        int num_file_args, 
+        -1 upon error (incorrect number of args)
+        0 if no args
+    """
+    length = len(sys.argv)-1
+    correct_num = length%2 == 0
+    if correct_num:
+        return (length)
+    else:
+        return -1
+        
+        
+def display_file_info_cache_options(file_info_cache):
+    print("\nSAVED FILES:\n")
+    length = len(file_info_cache)
+    for i in range(0, length):
+        print("{:d} {:}".format(i+1, os.path.basename(file_info_cache[i][0])))
+    print("--------------------------------------------------")
+    
+    
+def add_command_line_arg_file_info(file_info_cache):
+    """
+    adds command line argument file info to the file info cache
+    """
+    args = sys.argv
+    length = len(args)
+    for i in range(1, length, 2):
+        if not add_absolute_file_info(file_info_cache, (args[i], args[i+1])):
+            print("Failed to add " + str(os.path.basename(args[i])))
+            
+def add_absolute_file_info(file_info_cache, file_info):
+    """
+    keeps absolute file path names and encoding tuples
+    for processing at any time in any directory
+    
+    return:
+        boolean True if successful, False otherwise
+        (NOTE: does not guarantee that file successfully used when accessed)
+    """
+    absolute = file_info[0]
+    if os.path.exists(absolute) and os.path.isfile(absolute):
+        file_info_cache.append(file_info)
+        return True
+    return False
+        
+        
+def open_text_file(file_info_cache):
     """
     Open a file for reading
     
     param:
-        string 2-tuple file_info (opt.)
-            (a tuple containing the file name and encoding to try first)
+    param (opt.):
+        list of 2-tuple containing absolute file names and encoding numbers
     return:
-        file descriptor for reading, None upon error (given file_info)
+        file descriptor for reading, None upon exit or error (given file_info)
     """
     
-    if file_info:
-        try:
-            text_file = open(file_info[0], 'r',
-                             encoding=get_encoding(file_info[1]))
-        except:
-            print("ERROR: unable to open the file\n")
-            return None
-        else:
-            return text_file
-            
     first_prompt = True
     # try to open a file (specified with an index) and its encoding
     while True:
@@ -1216,34 +1257,54 @@ def open_text_file(file_info=None):
             first_prompt = False
             
         option = input("Select a File:\n"
-                       "Enter the index of a file in the "
-                       "current working directory\n"
+                       "    enter <index> to select a file in"
+                       " the current working directory\n"
+                       "    enter 'c <index>' to select a saved file\n"
                        "    enter 'cd <path>' to change the working directory\n"
                        "    enter 'ls' to show the files in the current working"
-                       " directory\n").strip()
+                       " directory\n"
+                       "    enter 'lsc' to show saved files\n"
+                       "    enter '0' to exit\n").strip()
                        
         if option.startswith("cd"):
             first_prompt = set_directory(option)
+            if first_prompt == None:
+                return None
+        elif option.startswith("lsc"):
+            display_file_info_cache_options(file_info_cache)
         elif option.startswith("ls"):
             file_options = get_files(display=True)
+        elif option == "0":
+            return None
         else:
             try:
-                index = int(option)
-                if index < 0 or index >= len(file_options):
-                    raise ValueError()
+                if option.startswith("c "):
+                    which_list = file_info_cache
+                    index = int(option[2:])-1
+                    file_name = which_list[index][0]
+                    encoding_key = file_info_cache[index][1]
+                else:
+                    which_list = file_options
+                    index = int(option)-1
+                    if index < 0 or index > len(which_list):
+                        raise ValueError()
+                    file_name = which_list[index]
+                    encoding_key = input("Enter the encoding of the file: "
+                                         "(enter or 1 for ascii default), "
+                                         "(2 for utf-8), "
+                                         "(3 for mac-roman), "
+                                         "specify otherwise: ")
             except ValueError:
                 print("ERROR: invalid index\n")
+            except:
+                print("ERROR: invalid access\n")
             else:
-                encoding_key = input("Enter the encoding of the file: "
-                                  "(enter or 1 for ascii default), "
-                                  "(2 for utf-8), "
-                                  "(3 for mac-roman), "
-                                  "specify otherwise: ")
                 try:
-                    text_file = open(file_options[index], 'r', 
+                    text_file = open(file_name, 'r', 
                                      encoding=get_encoding(encoding_key))
-                except:
+                except Exception as e:
                     print("ERROR: unable to open the file\n")
+                    print(e)
                 else:
                     return text_file
                     
@@ -1262,7 +1323,7 @@ def set_directory(command=None):
         try:
             if not command:
                 print("Currently in {:}".format(os.getcwd()))
-                option = input("cd Commands:\n\tcd <path> to change directory\n"
+                option = input("cd Commands:\ncd <path> to change directory\n"
                                "    h to select the home directory\n"
                                "    enter to select the current directory\n"
                                "    ls to list all files\n"
@@ -1280,16 +1341,14 @@ def set_directory(command=None):
             elif option.startswith("ls"):
                 get_files(display=True)
             elif option == "0":
-                break
+                return None
             else:
                 raise Exception("INVALID option")
         except:
-            print(option)
+            # print(option)
             print("ERROR, directory not found\n")
             
-    sys.exit("Goodbye!")
-    
-    
+            
 def output_analysis_dict(analysis_dict, choices_dict=None):
     """
     displays desired information based on analysis dictionary
@@ -1334,23 +1393,20 @@ def output_analysis_dict(analysis_dict, choices_dict=None):
     # TODO <------------------------------
     
     
-def get_num_file_info_args():
-    """
-    returns the number of file : encoding pairs specified as command line args
+
     
-    return:
-        int num_file_args, 
-        -1 upon error (incorrect number of args)
-        0 if no args
-    """
-    length = len(sys.argv)-1
-    correct_num = length%2 == 0
-    if correct_num:
-        return (length)
-    else:
-        return -1
-        
-        
+    
+def test_main():
+    file_info_cache = []
+    add_command_line_arg_file_info(file_info_cache)
+    print(file_info_cache)
+    
+    
+    
+    
+    # print(os.path.abspath("test_11.txt"))
+    
+    
 """
 START
 """
@@ -1370,38 +1426,34 @@ def main():
     
     print("Current working directory: {:}".format(os.getcwd()))
     
-    
+    file_info_cache = []
     num_info_args = get_num_file_info_args()
-    f_info = 0
     if num_info_args > 0:
-        f_info = 1
-    elif num_info_args == 0:
-        f_info = 1
+        add_command_line_arg_file_info(file_info_cache)
     else:
         print("Invalid number of arguments")
         
     choose_file = True
     while choose_file:
-        # cycle through file arguments, if any exist
-        if f_info > 0 and f_info <= num_info_args:
-            print("Selecting file from input list")
-            text_file = open_text_file((sys.argv[f_info],sys.argv[f_info+1]))
-            f_info += 2
-            if not text_file:
-                continue
-        # file selection
-        else:
-            text_file = open_text_file()
-            
-        success = False
+        success = True
         try:
-            # call calc_word_analysis(), save the analysis dict that it returns
+            # file selection
+            text_file = open_text_file(file_info_cache)
+            
+            if text_file is None:
+                break
+                
+            # call calc_word_analysis(),
+            # save the analysis dict that it returns
             analysis_dict = calc_word_analysis(text_file)
-            success = True
         except:
             print("ERROR: cannot read file")
-
-        text_file.close()
+            success = False
+        finally:
+            if text_file is not None:
+                text_file.close()
+            else:
+                success = False
     
         if success:
             output_analysis_dict(analysis_dict)
@@ -1422,13 +1474,18 @@ def main():
                     text_step(text_as_lines, word_analysis[word])
                 else:
                     print("Error: word cannot be found\n")
+        
+        
         prompt = True     
         while prompt:
             choice = input("Press enter or 1 to choose a new file, 0 to exit: ")
             if choice == ENTER or choice == "1":
                 prompt = False
             elif choice == "0":
-                sys.exit("Goodbye!") 
+                choose_file = False
+                prompt = False
+                    
+    sys.exit("Goodbye!") 
 
 
     """
@@ -1508,6 +1565,7 @@ def main():
 # main function
 if __name__ == "__main__":
     try:
+        # test_main()
         main()
     except EOFError:
         pass
