@@ -4,6 +4,8 @@ import sys
 import os
 import time
 
+from abc import ABCMeta, abstractmethod
+
 """
 Step-through Text and Word Viewer 
 ver 2.x
@@ -163,7 +165,7 @@ def is_valid_char(char, in_word_punct):
     return False
     
     
-def print_instructions():
+def print_step_instructions():
     """
     displays the commands for text_step and word_step functions
     """
@@ -309,7 +311,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
         if legal_command:
             # display the word marker (preceded by proper number of spaces)
             # under the current text line
-            print(' '*(pos_on_line[w_inst_index]) + '^- w ' + str(word_i[w_inst_index]))
+            print(' '*(pos_on_line[w_inst_index]) + '^- w' + str(word_i[w_inst_index]))
             # display the number of words between the current word instance and
             # the previous word instance reached
             if choice == W_NEXT_INST:
@@ -363,7 +365,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
             return 1, current_line
         # display instructions
         elif choice in INSTRUCTIONS:
-            print_instructions()
+            print_step_instructions()
         else: 
             # if the command is a valid integer,
             # return a step of int(choice), print (choice) lines
@@ -380,7 +382,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     print("End of file reached at L" + str(current_line) + '\n')
     return 0, 0
     
-def text_step(text_as_lines, word_analysis):
+def text_step(text_as_lines, word_analysis=None):
     """
     step-through lines in the text,
         enter a positive number n to display and step forward by n lines
@@ -390,7 +392,7 @@ def text_step(text_as_lines, word_analysis):
         (whose word_analysis list is passed to text_step() )
         enter "qa" to display the instructions
         enter 0 to exit
-    param:
+    param (opt.):(can only move through text without a word_analysis dictionary)
         list, text_as_lines: 
             the entire input text divided into lines,
             where line i is stored in text_as_lines[i-1]
@@ -424,13 +426,16 @@ def text_step(text_as_lines, word_analysis):
                                     [pos_on_line]
                                 ]
     return:
-        0 (QUIT) upon success, 
+         0 (QUIT) upon success, 
         -1 (ERROR) upon an error e.g. in word step
     """
     
 
     #################################
 
+    if text_as_lines is None:
+        return ERROR
+        
     total_lines = len(text_as_lines)
 
     # lines displayed in a row
@@ -440,16 +445,20 @@ def text_step(text_as_lines, word_analysis):
     # line position in text file
     line_pos = 0
     
-    line_nums = word_analysis[1]
-    w_inst = word_analysis[2]
-    pos_on_line = word_analysis[3]
+    word_step_is_on = True
+    if word_analysis is None:
+        word_step_is_on = False
+    else:
+        line_nums = word_analysis[1]
+        w_inst = word_analysis[2]
+        pos_on_line = word_analysis[3]
 
     # current line number (displayed)
     current_line_l = 0
     
     # display the instructions upon first call of function
     if text_step.first_time:
-        print_instructions()
+        print_step_instructions()
         text_step.first_time = False
 
 
@@ -479,8 +488,11 @@ def text_step(text_as_lines, word_analysis):
 
                     # move to the next or previous instance of a word
                     if step == W_NEXT_INST or step == W_PREV_INST:
-                        ##########TRY/EXCEPT, 
-                        # enter and exit with return value printouts
+                        if not word_step_is_on:
+                            print("No word specified\n")
+                            continue
+                        ########## with testing enabled, 
+                        # can enter and exit with return value printouts
                         try:
 
                             # call word_step to handle movement to instances of 
@@ -506,7 +518,7 @@ def text_step(text_as_lines, word_analysis):
                         break
                     # display the instructions
                     elif step in INSTRUCTIONS:
-                        print_instructions()
+                        print_step_instructions()
                         continue
                     # otherwise interpret the command as an integer
                     else:
@@ -622,7 +634,9 @@ def calc_word_analysis(text_file,
                     with [%_indentifiable]
 
     """
-    
+    if text_file is None:
+        return None
+        
     # dictionary of lists and dictionaries to return
     analysis_dict = {}
     # word analysis dictionary of word count and lists
@@ -715,11 +729,12 @@ def calc_word_analysis(text_file,
                 # increment the line count
                 line_count += 1
     
-            # if the char is not alphabetic,
-            # continue to the next character if 
-            # the current word under construction has no alphabetic characters
+            # proceed immediately to the next character
+            # if the char is not alphabetic, continue to the next character
+            # or if the current word under 
+            # construction has no alphabetic characters
             # (words must begin with an alphabetic character)
-            if has_alpha == False and isalpha_(char) == False:
+            if not has_alpha and not isalpha_(char):
                 continue
     
             # treat alphabetic characters
@@ -728,7 +743,7 @@ def calc_word_analysis(text_file,
                 # has no alphabetical characters so far (is empty),
                 # mark the starting position of the word,
                 # mark the word as alphabetic
-                if has_alpha == False:
+                if not has_alpha:
                     pos_on_line = char_count_line
 
                     # UNUSED
@@ -769,7 +784,7 @@ def calc_word_analysis(text_file,
             # (words cannot have multiple punctuation marks in a row)
             # or the character is not alphabetic or
             # an otherwise valid punctuation mark or character
-            if double_punct == 2 or is_valid_char(char, in_word_punct) == False:
+            if double_punct == 2 or not is_valid_char(char, in_word_punct):
         
                 # clear the punctuation buffer
                 del punct_buffer[:]
@@ -1155,23 +1170,38 @@ def configure(default=True):
     return choices_list
 """
 
-def get_files(display=False):
+def get_file_names(display=False):
     """
     walk the current directory and display all files
     
     return list file_options (list of file info)
     """
-    file_options = next(os.walk(os.getcwd()))[2]
-    
+    options = os.listdir(".")
     if display:
-        print("\nFILES:\n")
+        file_options = []
+        print("\nFILES:")
         count = 1
-        for file_name in file_options:
-            print(str(count) + ' ' + file_name)
-            count += 1
+        for name in options:
+            if os.path.isfile(name):
+                print(str(count) + ' ' + name)
+                count += 1
+                file_options.append(name)
         print("--------------------------------------------------")
-    
+    else:
+        file_options = [name for name in options if os.path.isfile(name)]
+        
     return file_options
+    
+def display_directories():
+    """
+    walk the current directory and display all sub-directories
+    """
+    options = os.listdir(".")
+    print("\nSUBDIRECTORIES:")
+    for dir in options:
+        if os.path.isdir(dir) and not dir.startswith("."):
+            print(dir)
+    print("--------------------------------------------------")
     
     
 def get_encoding(key):
@@ -1182,14 +1212,14 @@ def get_encoding(key):
         string encoding (name of encoding)
         upon error (invalid key), "ascii" by default
     """
-    if key == ENTER or key == '1' or key.lower() == "ascii":
+    if key == ENTER or key == '1' or key == None or key.lower() == "ascii":
         return "ascii"
     elif key == '2' or key.lower() == "utf-8":
         return "utf-8"
     elif key == '3' or key.lower() == "mac-roman":
         return "mac-roman"
     else:
-        return"ascii"
+        return key
         
         
 def get_num_file_info_args():
@@ -1210,23 +1240,33 @@ def get_num_file_info_args():
         
         
 def display_file_info_cache_options(file_info_cache):
-    print("\nSAVED FILES:\n")
+    # TODO: doc string
+    if file_info_cache is None or len(file_info_cache) == 0:
+        print("No saved files\n")
+        return False
+
     length = len(file_info_cache)
+    print("\nSAVED FILES:\n")
     for i in range(0, length):
         print("{:d} {:}".format(i+1, os.path.basename(file_info_cache[i][0])))
     print("--------------------------------------------------")
-    
+    return True
     
 def add_command_line_arg_file_info(file_info_cache):
     """
     adds command line argument file info to the file info cache
     """
+    if file_info_cache is None:
+        return False
+        
     args = sys.argv
     length = len(args)
     for i in range(1, length, 2):
         if not add_absolute_file_info(file_info_cache, (args[i], args[i+1])):
             print("Failed to add " + str(os.path.basename(args[i])))
-            
+    return True
+    
+    
 def add_absolute_file_info(file_info_cache, file_info):
     """
     keeps absolute file path names and encoding tuples
@@ -1236,14 +1276,23 @@ def add_absolute_file_info(file_info_cache, file_info):
         boolean True if successful, False otherwise
         (NOTE: does not guarantee that file successfully used when accessed)
     """
+    if file_info_cache is None or file_info is None:
+        return False
+        
     absolute = file_info[0]
     if os.path.exists(absolute) and os.path.isfile(absolute):
         file_info_cache.append(file_info)
         return True
     return False
     
-def add_file_info_from_file(file_info_cache, file_name="reserved_input_info.txt", 
+def add_file_info_from_file(file_info_cache, 
+                            file_name="reserved_input_info.txt", 
                             delimiter=' '):
+    # TODO: doc string
+    
+    if file_info_cache is None:
+        return False
+        
     if os.path.exists(file_name) and os.path.isfile(file_name):
         with open(file_name, 'r') as info:
             for line in info:
@@ -1251,14 +1300,16 @@ def add_file_info_from_file(file_info_cache, file_name="reserved_input_info.txt"
                 file_info[1]=file_info[1].strip()
                 add_absolute_file_info(file_info_cache,
                                       (file_info[0], file_info[1]))
-                                      
-def select_text_file(file_info_cache):
+    return True
+    
+    
+def select_text_file(file_info_cache=None):
     """
     Open a file for reading
     
-    param:
     param (opt.):
-        list of 2-tuple containing absolute file names and encoding numbers
+        list of 2-tuple file_info_cache
+            (containing absolute file names and encoding numbers)
     return:
         file descriptor for reading, None upon exit or error (given file_info)
     """
@@ -1268,7 +1319,7 @@ def select_text_file(file_info_cache):
     while True:
         # display files in current directory
         if first_prompt:
-            file_options = get_files(display=True)
+            file_options = get_file_names(display=True)
             first_prompt = False
             
         option = input("Select a File:\n"
@@ -1279,21 +1330,29 @@ def select_text_file(file_info_cache):
                        "    'ls' to show the files in the current working"
                        " directory\n"
                        "    'lsr' to show reserved files\n"
-                       "    '0' to exit\n").strip()
+                       "    'dirs' to list all sub-directories\n"
+                       "    '0' to quit\n").strip()
                        
         if option.startswith("cd"):
             first_prompt = set_directory(option)
             if first_prompt == None:
                 return None
-        elif option.startswith("lsr"):
+        elif option == "ls":
+            file_options = get_file_names(display=True)
+        elif option == "lsr":
             display_file_info_cache_options(file_info_cache)
-        elif option.startswith("ls"):
-            file_options = get_files(display=True)
+        elif option == "dirs":
+            display_directories()
         elif option == "0":
             return None
+        elif not option.isdigit() and not option.startswith("r "):
+            print("INVALID option")
         else:
             try:
                 if option.startswith("r "):
+                    if file_info_cache is None:
+                        print("No saved files")
+                        continue
                     which_list = file_info_cache
                     index = int(option[2:])-1
                     file_name = which_list[index][0]
@@ -1302,14 +1361,14 @@ def select_text_file(file_info_cache):
                     which_list = file_options
                     index = int(option)-1
                     if index < 0 or index > len(which_list):
-                        raise ValueError()
+                        raise IndexError()
                     file_name = which_list[index]
                     encoding_key = input("Enter the encoding of the file: "
                                          "(enter or 1 for ascii default), "
                                          "(2 for utf-8), "
                                          "(3 for mac-roman), "
                                          "specify otherwise: ")
-            except ValueError:
+            except IndexError:
                 print("ERROR: invalid index\n")
             except:
                 print("ERROR: invalid access\n")
@@ -1326,10 +1385,10 @@ def select_text_file(file_info_cache):
                     
 def set_directory(command=None):
     """
-    separates change directory functionality from default path selection
+    for setting the current working directory while running the program
     
-    param: string path=None (either prompt user first time or use the arg path)
-    
+    param: (opt.) 
+        string path=None (either prompt user first time or use the arg path)
     return: boolean (whether the directory was changed)
     """
     prev_wd = os.getcwd()
@@ -1337,60 +1396,67 @@ def set_directory(command=None):
     while True:
         try:
             if not command:
-                print("Currently in {:}".format(os.getcwd()))
-                option = input("cd Commands:\ncd <path> to change directory\n"
-                               "    h to select the home directory\n"
+                print("Currently in\n{:}".format(os.getcwd()))
+                option = input("cd Commands:\n" 
+                               "    'cd <path>' to change directory\n"
+                               "    'h' to select the utility home directory\n"
                                "    enter to select the current directory\n"
-                               "    ls to list all files\n"
-                               "    0 to quit\n").strip()
+                               "    'p' to select the previous directory\n"
+                               "    'ls' to list all files\n"
+                               "    'dir' to list all sub-directories\n"
+                               "    '0' to quit\n").strip()
             else:
                 option = command
                 command = None
-                           
+                
             if option == ENTER:
                 return os.getcwd() == prev_wd
             elif option == 'h':
                 os.chdir(PROGRAM_HOME)
+            elif option == 'p':
+                os.chdir(prev_wd)
+                return True
             elif option.startswith("cd "):
                 os.chdir(option[3:].strip())
-            elif option.startswith("ls"):
-                get_files(display=True)
+            elif option == "ls":
+                get_file_names(display=True)
+            elif option == "dir":
+                display_directories()
             elif option == "0":
                 return None
             else:
-                raise Exception("INVALID option")
-        except:
-            # print(option)
+                print("INVALID option")
+        except Exception as e:
             print("ERROR, directory not found\n")
+            print(e)
             
             
-def output_analysis_dict(analysis_dict, choices_dict=None):
+def calculate_word_info(analysis_dict, output_dict, choices_set):
     """
-    displays desired information based on analysis dictionary
+    NOTE: TESTING, not used much yet
+    
+    saves desired information based on analysis dictionary 
+    in an output dictionary
+    
     param:
         dictionary analysis_dict 
             (the text analysis dictionary containing information to print)
-        dictionary choices_dict=None choices 
-            (specifies which items in the dictionary are valid for printing)
+        dictionary output_dict
+            (the dictionary in which to store lists containing desired info)
+        set of WordInfo choices_set (each element calculates desired info)
+    return:
+        boolean True if calculation is run successfully, False otherwise 
     """
     
-    all_words = analysis_dict["word list"]
-    # track the longest word
-    w_longest = []
-    len_longest = 0
-    for w in all_words:
-        if len(w) > len_longest:
-            del w_longest[:]
-            w_longest.append(w)
-            len_longest = len(w)
-        elif len(w) == len_longest:
-            w_longest.append(w)
-        # print(w) <-- to display the words in order of first discovery
-    print('\n\n')
+    if analysis_dict is None or output_dict is None or len(choices_set) == 0: 
+        return False
+        
+    for kind in choices_set:
+        output_dict[kind.key] = kind.calculate(analysis_dict)
     
-    # print("////All Word Counts////\n\n")
+    return True
 
-    word_analysis = analysis_dict["word analysis"]
+    """
     count = 0
     line_number = 0
     format_start = '{:<' + str(len_longest) + '} {:>'
@@ -1406,22 +1472,117 @@ def output_analysis_dict(analysis_dict, choices_dict=None):
         print("Longest word: {:} Length in characters: {:d}\n\n".format(w_longest[0], len_longest))
         
     # TODO <------------------------------
+    """
     
-    
+class WordInfo(metaclass=ABCMeta):
+    """
+    serves as an abstract base class for all classes with a calculate
+    method that acts upon an analysis dictionary
+    """
+    @abstractmethod
+    def calculate(self):
+        """
+        must be implemented in sub-classes
+        """
+        pass
 
+class LongestInfo(WordInfo):
+    """
+    figures which word(s) is/are the longest in the text,
+    returns the word (or multiple ties) as a list
+    """
+    def __init__(self):
+        """
+        sets the class key as "word longest"
+        """
+        self.key = "word longest"
+        
+    def calculate(self, analysis_dict):
+        """
+        find the longest word(s)
+        param:
+            dictionary analysis_dict (created from the text)
+        return:
+            list of string (the longest word(s))
+        """
+        
+        all_words = analysis_dict["word list"]
+        w_longest = []
+        len_longest = 0
+        for w in all_words:
+            if len(w) > len_longest:
+                del w_longest[:]
+                w_longest.append(w)
+                len_longest = len(w)
+            elif len(w) == len_longest:
+                w_longest.append(w)
+        return w_longest
+        
+def display_word_list(analysis_dict):
+    """
+    displays the list of unique words found in the text
     
+    param:
+        dictionary analysis_dict
+    """
+    if analysis_dict is None:
+        return False
     
-def test_main():
-    file_info_cache = []
-    add_command_line_arg_file_info(file_info_cache)
-    print(file_info_cache)
+    print("////All Words in List////\n\n")
+    all_words = analysis_dict["word list"]
+    # track the longest word
+    w_longest = []
+    len_longest = 0
+    for w in all_words:
+        if len(w) > len_longest:
+            del w_longest[:]
+            w_longest.append(w)
+            len_longest = len(w)
+        elif len(w) == len_longest:
+            w_longest.append(w)
+        print(w)
+    print('\n\n')
     
-    
-    
-    
-    # print(os.path.abspath("test_11.txt"))
-    
-    
+    return True
+        
+class LenXInfo(WordInfo):
+    """
+    creates a list containing the sub-set of words in the text that
+    have a given length
+    """
+    def __init__(self, length):
+        """
+        sets the class key as the concatenation of "word length" 
+        and the desired word length, saves the desired length
+        """
+        self.key = "word length " + str(length)
+        self.length = length
+        
+    def calculate(self, analysis_dict):
+        """
+        find the words of length "length"
+        param:
+            dictionary analysis_dict (created from the text)
+            int length (of desired words)
+        return:
+            list of string (the word(s) with length "length")
+        """
+        all_words = analysis_dict["word list"]
+        num = self.length
+        w_len = []
+        for w in all_words:
+            if len(w) == num:
+                w_len.append(w)
+        return w_len
+        
+def test_info_classes(analysis_dict):
+    """
+    TESTING WordInfo CLASS
+    """
+    output_dict = {}
+    calculate_word_info(analysis_dict, output_dict, 
+                        set([LongestInfo(), LenXInfo(1)]))
+    print(output_dict)
 """
 START
 """
@@ -1441,7 +1602,7 @@ def main():
     
     print("Current working directory: {:}".format(os.getcwd()))
     
-    file_info_cache = []
+    file_info_cache = None
     num_info_args = get_num_file_info_args()
     if num_info_args > 0:
         add_command_line_arg_file_info(file_info_cache)
@@ -1474,7 +1635,10 @@ def main():
                 success = False
     
         if success:
-            output_analysis_dict(analysis_dict)
+        
+            test_info_classes(analysis_dict)
+
+            # calculate_info_analysis_dict(analysis_dict)
             
             print("////TEXT STEP VIEWER////\n")
             
@@ -1484,11 +1648,17 @@ def main():
             
             prompt = True
             while prompt:
-                word = input("Please select a word "
-                             "(enter 0 to leave the current file): ").lower()
+                word = input("Please select a word from the text "
+                             "(enter a blank to step "
+                             "through the text only)\n"
+                             "(enter 0 to leave "
+                             "the current file): ").strip().lower()
+                             
                 if word == '0':
                     prompt = False
-                elif word in word_list:                
+                elif word == ENTER:
+                    text_step(text_as_lines, None)
+                elif word in word_list:
                     text_step(text_as_lines, word_analysis[word])
                 else:
                     print("Error: word cannot be found\n")
@@ -1582,7 +1752,8 @@ def main():
 # main function
 if __name__ == "__main__":
     try:
-        # test_main()
+        # test_classes()
         main()
     except EOFError:
         pass
+        
