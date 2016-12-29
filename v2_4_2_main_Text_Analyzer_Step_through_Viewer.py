@@ -91,7 +91,7 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
             low = mid + 1
         #if test_line > starting_line
         elif (line_numbers[index_first_valid_line] >= test_line
-                  and mid < index_first_valid_line):
+                  and mid <= index_first_valid_line):
             index_first_valid_line = mid
             high = mid - 1
             
@@ -119,7 +119,7 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
             high = mid - 1
         # if test_line < starting_line
         elif (line_numbers[index_first_valid_line] <= test_line 
-                  and mid > index_first_valid_line):
+                  and mid >= index_first_valid_line):
             index_first_valid_line = mid
             low = mid + 1
             
@@ -229,6 +229,8 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
         tuple <--- TODO: Explanation
     """
     
+    print("ENTERING WORD STEP")
+    
     line_nums   = word_analysis[LINE_NUMBERS]
     word_i      = word_analysis[ITH_WORD_IN_TEXT]
     pos_on_line = word_analysis[ITH_CHAR_ON_LINE] 
@@ -239,7 +241,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     w_inst_index = 0
     # number of word instances
     num_word_inst = len(word_i)
-
+    
     """
     find first instance of word at/after or at/before starting line
     """
@@ -254,7 +256,7 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
             found = binary_min_line_above_search(line_nums, 0, 
                                                  len(line_nums) - 1,
                                                  starting_line)
-
+                                                 
             # return (0, 0) if the end of the file has been reached
             # (no more instances later in the text) to exit
             if found == -1:
@@ -491,10 +493,9 @@ def text_step(text_as_lines, word_analysis):
                                              current_line_l, step)
                             current_line_l = step[1]
 
-                            # print("EXITING WORD_STEP with 
-                            # current_line = ", # current_line_l, 
-                            # "return value = ", step)
+                            # print("EXITING WORD_STEP with current_line = ", current_line_l, " return value = ", step)
                         except Exception as e:
+                            print(e)
                             print("CRITICAL ERROR, WORD STEP FAILED")
                             return ERROR
                         ##########
@@ -527,7 +528,8 @@ def text_step(text_as_lines, word_analysis):
                         return QUIT
                 # upon an exception / if command unrecognized,
                 # loop around and prompt for a new command
-                except:
+                except Exception as e2:
+                    print(e2)
                     print("INVALID command")
                     continue
     # before returning from the function, 
@@ -544,7 +546,10 @@ def calc_word_analysis(text_file,
                        eq_words={"can't":["can", "not"], 
                                  "cannot":["can", "not"],
                                  "won't":["will", "not"],
-                                 "shouldn't":["should", "not"]
+                                 "shouldn't":["should", "not"],
+                                 "you'd":["you", "would"],
+                                 "you'll":["you", "will"],
+                                 "you're":["you", "are"]
                        }):
     """
     calculates word frequencies given a text string,
@@ -556,7 +561,8 @@ def calc_word_analysis(text_file,
            frozenset in_word_punct 
                (set of punctuation and marks used as part of words)
            dictionary eq_words (dictionary of words to consider as 
-                                    other words or combinations of words
+                                    other words or combinations of words)
+                                    NOTE: Currently unused
     return: 
         dictionary analysis_dict 
         (of word_analysis dictionary and optional dictionaries)
@@ -1235,9 +1241,18 @@ def add_absolute_file_info(file_info_cache, file_info):
         file_info_cache.append(file_info)
         return True
     return False
-        
-        
-def open_text_file(file_info_cache):
+    
+def add_file_info_from_file(file_info_cache, file_name="reserved_input_info.txt", 
+                            delimiter=' '):
+    if os.path.exists(file_name) and os.path.isfile(file_name):
+        with open(file_name, 'r') as info:
+            for line in info:
+                file_info = line.split(delimiter)
+                file_info[1]=file_info[1].strip()
+                add_absolute_file_info(file_info_cache,
+                                      (file_info[0], file_info[1]))
+                                      
+def select_text_file(file_info_cache):
     """
     Open a file for reading
     
@@ -1257,20 +1272,20 @@ def open_text_file(file_info_cache):
             first_prompt = False
             
         option = input("Select a File:\n"
-                       "    enter <index> to select a file in"
+                       "    '<index>' to select a file in"
                        " the current working directory\n"
-                       "    enter 'c <index>' to select a saved file\n"
-                       "    enter 'cd <path>' to change the working directory\n"
-                       "    enter 'ls' to show the files in the current working"
+                       "    'r <index>' to select a reserved file\n"
+                       "    'cd <path>' to change the working directory\n"
+                       "    'ls' to show the files in the current working"
                        " directory\n"
-                       "    enter 'lsc' to show saved files\n"
-                       "    enter '0' to exit\n").strip()
+                       "    'lsr' to show reserved files\n"
+                       "    '0' to exit\n").strip()
                        
         if option.startswith("cd"):
             first_prompt = set_directory(option)
             if first_prompt == None:
                 return None
-        elif option.startswith("lsc"):
+        elif option.startswith("lsr"):
             display_file_info_cache_options(file_info_cache)
         elif option.startswith("ls"):
             file_options = get_files(display=True)
@@ -1278,7 +1293,7 @@ def open_text_file(file_info_cache):
             return None
         else:
             try:
-                if option.startswith("c "):
+                if option.startswith("r "):
                     which_list = file_info_cache
                     index = int(option[2:])-1
                     file_name = which_list[index][0]
@@ -1430,15 +1445,17 @@ def main():
     num_info_args = get_num_file_info_args()
     if num_info_args > 0:
         add_command_line_arg_file_info(file_info_cache)
-    else:
+    elif num_info_args < 0:
         print("Invalid number of arguments")
         
+    add_file_info_from_file(file_info_cache)
+    
     choose_file = True
     while choose_file:
         success = True
         try:
             # file selection
-            text_file = open_text_file(file_info_cache)
+            text_file = select_text_file(file_info_cache)
             
             if text_file is None:
                 break
@@ -1446,8 +1463,9 @@ def main():
             # call calc_word_analysis(),
             # save the analysis dict that it returns
             analysis_dict = calc_word_analysis(text_file)
-        except:
+        except Exception as e:
             print("ERROR: cannot read file")
+            print(e)
             success = False
         finally:
             if text_file is not None:
@@ -1474,9 +1492,8 @@ def main():
                     text_step(text_as_lines, word_analysis[word])
                 else:
                     print("Error: word cannot be found\n")
-        
-        
-        prompt = True     
+                    
+        prompt = True
         while prompt:
             choice = input("Press enter or 1 to choose a new file, 0 to exit: ")
             if choice == ENTER or choice == "1":
