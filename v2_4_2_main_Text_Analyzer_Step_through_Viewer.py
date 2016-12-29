@@ -1170,6 +1170,34 @@ def configure(default=True):
     return choices_list
 """
 
+
+def display_word_list(analysis_dict):
+    """
+    displays the list of unique words found in the text
+    
+    param:
+        dictionary analysis_dict
+    """
+    if analysis_dict is None:
+        return False
+    
+    print("////All Words in List////")
+    all_words = analysis_dict["word list"]
+    # track the longest word
+    w_longest = []
+    len_longest = 0
+    for w in all_words:
+        if len(w) > len_longest:
+            del w_longest[:]
+            w_longest.append(w)
+            len_longest = len(w)
+        elif len(w) == len_longest:
+            w_longest.append(w)
+        print(w)
+    print('--------------------------------------------------\n')
+    return True
+    
+    
 def get_file_names(display=False):
     """
     walk the current directory and display all files
@@ -1246,7 +1274,7 @@ def display_file_info_cache_options(file_info_cache):
         return False
 
     length = len(file_info_cache)
-    print("\nSAVED FILES:\n")
+    print("\nSAVED FILES:")
     for i in range(0, length):
         print("{:d} {:}".format(i+1, os.path.basename(file_info_cache[i][0])))
     print("--------------------------------------------------")
@@ -1297,7 +1325,7 @@ def add_file_info_from_file(file_info_cache,
         with open(file_name, 'r') as info:
             for line in info:
                 file_info = line.split(delimiter)
-                file_info[1]=file_info[1].strip()
+                file_info[1] = file_info[1].strip()
                 add_absolute_file_info(file_info_cache,
                                       (file_info[0], file_info[1]))
     return True
@@ -1518,32 +1546,6 @@ class LongestInfo(WordInfo):
                 w_longest.append(w)
         return w_longest
         
-def display_word_list(analysis_dict):
-    """
-    displays the list of unique words found in the text
-    
-    param:
-        dictionary analysis_dict
-    """
-    if analysis_dict is None:
-        return False
-    
-    print("////All Words in List////\n\n")
-    all_words = analysis_dict["word list"]
-    # track the longest word
-    w_longest = []
-    len_longest = 0
-    for w in all_words:
-        if len(w) > len_longest:
-            del w_longest[:]
-            w_longest.append(w)
-            len_longest = len(w)
-        elif len(w) == len_longest:
-            w_longest.append(w)
-        print(w)
-    print('\n\n')
-    
-    return True
         
 class LenXInfo(WordInfo):
     """
@@ -1583,6 +1585,8 @@ def test_info_classes(analysis_dict):
     calculate_word_info(analysis_dict, output_dict, 
                         set([LongestInfo(), LenXInfo(1)]))
     print(output_dict)
+    
+    
 """
 START
 """
@@ -1602,7 +1606,7 @@ def main():
     
     print("Current working directory: {:}".format(os.getcwd()))
     
-    file_info_cache = None
+    file_info_cache = []
     num_info_args = get_num_file_info_args()
     if num_info_args > 0:
         add_command_line_arg_file_info(file_info_cache)
@@ -1648,13 +1652,16 @@ def main():
             
             prompt = True
             while prompt:
-                word = input("Please select a word from the text "
-                             "(enter a blank to step "
-                             "through the text only)\n"
-                             "(enter 0 to leave "
-                             "the current file): ").strip().lower()
-                             
-                if word == '0':
+                word = input("Commands:\n"
+                             "    Enter a word from the text to step between "
+                             "instances of it\n"
+                             "    Enter a blank to step through the text only\n"
+                             "    'lw' to list the words found in the text\n"
+                             "    '0' to leave the current file\n"
+                             "").strip().lower()
+                if word == 'lw':
+                    display_word_list(analysis_dict)
+                elif word == '0':
                     prompt = False
                 elif word == ENTER:
                     text_step(text_as_lines, None)
@@ -1752,7 +1759,6 @@ def main():
 # main function
 if __name__ == "__main__":
     try:
-        # test_classes()
         main()
     except EOFError:
         pass
