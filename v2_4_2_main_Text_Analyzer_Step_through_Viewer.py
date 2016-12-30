@@ -1600,9 +1600,9 @@ def test_info_classes(analysis_dict):
     print(output_dict)
     
     
-"""
-START
-"""
+""""""""""
+START MAIN
+""""""""""
 def main():
     """
     Handles the main instruction sequence for receiving input and
