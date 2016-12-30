@@ -1,69 +1,138 @@
-# Text-Analyzer-and-Step-through-Viewer (Main version is v2_4)
-This project started as a word frequency/counter,
-but I wanted to add the ability to step through a given text via command line,
-jumping to specific lines and between instances of specific words.
-Information such as "number of words in between current and previously-visited" instances and line numbers are displayed.
-It is possible to display a chosen number of lines in the text at a time.
-The project is a work-in-progress, and I intend to experiment with other ways to organize the necessary line/word information and 
-see whether there is any improvements or advantages. I have included various sample files (some large and others smaller). 
-The best option is to set all defaults and to select one of the files (or place your own in the directory.)
-It is also ideal for processing to terminate input text files with a new-line character.
-Please enjoy.
+# Text-Analyzer-and-Step-through-Viewer (Main version v2_4_2)
+The project is a utility to navigate an input text and examine the usage, 
+repetition, and proximity of words.
+The viewer can jump forwards and backwards in an input text by line or 
+between instances of particular words to see distances between those 
+word instances. I wish to develop the program into a tool for 
+more text analysis as I learn more about areas such as
+natural language processing. (For example, one might compare authors' word
+use or examine one's own writing styles with the tool.)
 
-Karl Toby Rosenberg
+Version 2_4_2, December 2016
 
-Text Analyzer (word counts, separation of instances of words, others) and Text Viewer
-current test ver 3, July 6, 2016
+By Karl Toby Rosenberg
 
+## Instructions
 
-Implementations of main and test versions:
+ ### Running the program:
+    # in the command line:
+    
+    # plain start:
+    $ python3 v2_4_2_main_Text_Analyzer_Step_through_Viewer.py test_11.txt
+    
+    # specify files to add to the reserved files list: 
+    # (Use absolute file path names here unless the file is in the program
+       directory)
+    $ python3 v2_4_2_main_Text_Analyzer_Step_through_Viewer.py test_11.txt 
+    <file_name> <encoding_name e.g. ascii> ... <file_name_k> <encoding_name_k>
 
-1> store positions of new-line characters (the index of the characters with respect to the entire list), read characters until new-lines are reached
+    # (I will shorten the name of the exectable)
+    
+ ### Choosing File(s), Setting-up Working Directory:
+ - The program displays a list of files in the current working directory
+ paired with convenience indices
+ - You are prompted to select a file via a number of commands:
+  * *<index>* to select the file corresponding to the index (then specify the encoding, e.g. 1 for ascii or ascii)
+  * *r <index>* to select a reserved file
+     * The program keeps a reserved files list/cache so even if you change
+     directory while running the program, the reserved files can be opened.
+     File:encoding pairs specified as command line arguments are added to the list,
+     as well as File:encoding pairs listed in a local *reserved_input_info.txt*
+     file (one pair for each line, separated by a space)
+     The file name and separator between file and encoding (in the file) can be
+     changed by passing optional arguments to the relevant function: 
+  * *add_file_info_from_file()*
+  *cd <path>* to change directory
+   * This works similarly to the traditional cd command
+   * cd sub-commands:
+    * *cd <path>* to continue to change directory
+    * *h* to select the utility's starting home directory
+    * *enter* to confirm the current directory and return to file selection
+    * *p* to cancel (even after changing directory without confirming)
+    * *ls* to list all available files in the current directory
+    * *dir* to list all immediate sub-directories
+    * *0* to quit the program
+  * *ls* to list all available files in the current directory
+  * *lsr* to list all available files in the reserved files list
+  * *dir* to list all immediate sub-directories
+  * *0* to quit the program
+  
+ ### Text Step and Word Step:
+ 
+ You are then prompted to start using the text step functionality:
+ - enter a word that appears in the text to be able to step
+ between instances of the word, press enter or an empty line to
+ ignore this functionality 
+ - You can always exit the stepper with *0* to
+ choose a(nother) word or select another file
+  Commands to enter:
+    - a number *n* to step forwards in the text by *n* lines
+    - a negative number *-n* to move to a specific line number *n*
+    NOTE: moving to a line beyond the end of the text will exit text step
+    and prompt for a new word or new file
+    
+    - *<* and *>* to skip to the previous or next instance of the given word
+     the program will move to the correct line and
+     indicate the position of the word instance, as well as display
+     the number of words between the new and previous instance and the 
+     word number of the new instance (word i in the entire text)
+    - *qa* or *help* to display the instructions
+    - *0* to leave text step for this file (and have the option to choose
+     another word or file, or to list the words in the current file with *lsw*)
+     
+### Possible Explorations:
+I would like to see whether I can also track distance relationships between
+different words as opposed to instances of a specific word.
+This will likely require a more complex system with various graphs 
+and many more calculations. I might try to use databases and/or play with
+a different language (perhaps C) as outlined below (under the Version 3>
+heading) Reading the text in smaller chunks may help, as might being
+more careful about what information is stored as a value for a string key
+(having pointer arithmetic might help here too.)
+I'd like to turn this program into something that can be more easily used
+for comparing texts (e.g. authors' word use habits in terms of distances). I
+will probably need to compile a sub-set of words (definitely omitting
+ones such as "a" and "the") related to a specific topic (e.g. philosophical
+terms when looking at philosophers' writing).
+I would also like to see whether there may be educational or 
+self-analysis applications to some
+extent. The newer directory changing, file-reserving, and work-in-progress
+features are making the program easier to use.
 
-2_2 and _4> store the text as lines (0 through L-1) in a list
+### Work-in-Progress Functionality:
+- WordInfo class
+    * extend from the abstract WordInfo class to create a "command" for
+    calculating information based on the analysis dictionary 
+    (created from the input text). Assign the derived class a key
+    for retrieval from an output dictionary and implement a calculate method
+    that works upon the analysis dictionary. Simple test examples include
+    finding the longest words in the text or finding all words with a given
+    length 
 
-3> store positions of the beginning of each line (the index of the starting character with respect to the entire text),
-does NOT store the list, reads directly from file object
-implementation required check for both DOS/Windows and UNIX/UNIX-like system new-lines (\r\r, \n),
+### TEST and OLD VERSIONS
+Version 3> 
+-stores positions of the beginning of each line 
+(the index of the starting character with respect to the entire text),
+-does NOT store the text in a list, reads from file for every line output
+-requires check for both DOS/Windows and 
+UNIX/UNIX-like system new-lines (\r\n, \n)
+A problem: This uses seek(), which reads in terms of bytes. Python
+char strings are of variable length and do not represent actual
+sizes in bytes in the text. I need to encode any non-ASCII character,
+and doing so is noticeably slower than when encoding isn't done. 
+In other words, there is a tradeoff between speed and memory use.
+Options:
+-Use ASCII-only text so len(Python char) is one byte
+(This might not a good limitation to have.)
+-Use another language for the text input and parsing phase (Perhaps C,
+which has char primitives, though there would be additional challenges
+related to non-ASCII support. I have been experimenting with the idea
+in the hash-table C project.)
+-Something completely different...
 
--I have to see whether seek() buffers most of the types of files I am using,
-and I also have to see how it behaves when seeking backwards through a file.
-The program does not modify the text file or store the full text.
--ASCII-only supported for sure, but I believe that I have correctly implemented
-a way to track the positions of unicode characters, but the additional encoding
-slows the program more. I will see whether there are better ways of achieving the same effect.
-Otherwise version 3 is definitely best left as an ASCII-encoding-only version.
-Additional testing is probably best.
-(v1 and v2_2 are more tolerant for now)
-
--NOTE: I believe that I made it possible for unicode character positions to be recorded
-correctly. This needs additional testing.
-
-
-Step-through-text-viewer:
-
--Steps through text x lines at a time (1 by default), displays line number
-jumps to specific lines
-
--skips to specific instances of a chosen word 
-at/after or at/before current line position (forwards and backwards)
-
--displays the word instance's position/index in the text,
-displays number of words skipped (forwards or backwards)
-
--If end of file reached 
-(either through a line skip or through an attempt to step forward after 
-the last instance of a word has already been reached),
-exits (prompts to enter a new word to "track")
-
--If no instance of the chosen word found before the current line,
-moves directly to the first instance
-
--possible not to remove extra punctuation (less accurate)
-possible to remove specified (trivial words)
-mood/gender word counts possible
-
-to-do: implement way for the user to specify the 
-mood/gender/trivial words and replace the default placeholder lists
-
-current version 2_4 July 6, 2016
+Miscellaneous idea:
+-If I am able to create a system that saves memory by not loading the entire
+text into memory, then I might choose to store chunks of the text, 
+rather than none at all. For example, for very large texts I could use something
+similar to demand paging to save only a constant piece of a text at any 
+given point.

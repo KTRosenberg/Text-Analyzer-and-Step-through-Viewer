@@ -191,8 +191,8 @@ def print_step_instructions():
     displays the commands for text_step and word_step functions
     """
     print("TEXT STEP COMMANDS:\n"
-          "    -enter a number n to step by n lines\n"
-          "    -a number -n to skip to a specific line number\n"
+          "    -enter a positive number n to display the next n lines\n"
+          "    -a negative number -n to move to a specific line number n\n"
           "    -the < and > character keys to skip to\n"
           "         the previous or next instance of a word\n"
           "    -qa to display the commands again\n"
@@ -1280,7 +1280,8 @@ def add_command_line_arg_file_info(file_info_cache):
     args = sys.argv
     length = len(args)
     for i in range(1, length, 2):
-        if not add_absolute_file_info(file_info_cache, (args[i], args[i+1])):
+        if not add_absolute_file_info(file_info_cache, 
+                                      (os.path.abspath(args[i]), args[i+1])):
             print("Failed to add " + str(os.path.basename(args[i])))
     return True
     
@@ -1370,7 +1371,7 @@ def select_text_file(file_info_cache=None):
                        "    'ls' to show the files in the current working"
                        " directory\n"
                        "    'lsr' to show reserved files\n"
-                       "    'dirs' to list all sub-directories\n"
+                       "    'dir' to list all sub-directories\n"
                        "    '0' to quit\n").strip()
                        
         if option.startswith("cd"):
@@ -1381,7 +1382,7 @@ def select_text_file(file_info_cache=None):
             file_options = get_file_names(display=True)
         elif option == "lsr":
             display_file_info_cache_options(file_info_cache)
-        elif option == "dirs":
+        elif option == "dir":
             display_directories()
         elif option == "0":
             return None
@@ -1600,9 +1601,9 @@ def test_info_classes(analysis_dict):
     print(output_dict)
     
     
-""""""""""
+"""
 START MAIN
-""""""""""
+"""
 def main():
     """
     Handles the main instruction sequence for receiving input and
