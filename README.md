@@ -33,7 +33,8 @@ By Karl Toby Rosenberg
 - The program displays a list of files in the current working directory
  paired with convenience indices
  
- #### You are prompted to select a file via a number of commands:
+ #### You are prompted to select a file via a number of commands: (NOTE: sample files included)
+
 - \<*index*> to select the file corresponding to the index (then specify the encoding, e.g. 1 for ascii or ascii)
 - __r__ \<*index*> to select a reserved file
  * The program keeps a reserved files list/cache so even if you change
@@ -79,7 +80,7 @@ and prompt for a new word or file
  word number of the new instance (word *i* in the entire text)
 - __qa__ or __help__ to display the instructions
 - __0__ to leave text step for this file 
-(and have the option to choose another word or file, or to list the words in the current file with __lsw__)
+ (and have the option to choose another word or file, or to list the words in the current file with __lsw__)
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
