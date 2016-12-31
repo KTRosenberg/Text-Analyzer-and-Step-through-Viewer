@@ -11,16 +11,14 @@ Step-through Text and Word Viewer
 
 Author: Karl Toby Rosenberg
 
+Version 2_4_2, December 2016
+
 "Text Analyzer and Step-through Viewer" is a utility to navigate an input text 
 and examine the usage, repetition, and proximity of words.
 
 The viewer can jump forwards and backwards in an input text by line or
 between instances of particular words to see distances between those word 
 instances. 
-
-Version 2_4_2, December 2016
-
-By Karl Toby Rosenberg
 """
 
 # module-level constants:
