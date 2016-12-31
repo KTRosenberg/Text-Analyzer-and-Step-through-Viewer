@@ -18,10 +18,12 @@ By Karl Toby Rosenberg
     # in the command line:
 
     # plain start:
+    
     $ python3 v2_4_2_main_Text_Analyzer_Step_through_Viewer.py test_11.txt
 
     # specify files to add to the reserved files list: 
     # (Use absolute file path names here unless the file is in the program directory)
+    
     $ python3 v2_4_2_main_Text_Analyzer_Step_through_Viewer.py test_11.txt 
     <file_name> <encoding_name e.g. ascii> ... <file_name_k> <encoding_name_k>
 
