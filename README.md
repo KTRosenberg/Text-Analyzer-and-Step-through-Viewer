@@ -57,31 +57,32 @@ By Karl Toby Rosenberg
 - __ls__ to list all available files in the current directory
 - __lsr__ to list all available files in the reserved files list
 - __dir__ to list all immediate sub-directories
-- __0__ to quit the program
-  
- ### Text Step and Word Step:
- 
- You are then prompted to start using the text step functionality:
- - enter a word that appears in the text to be able to step
- between instances of the word, press enter or an empty line to
- ignore this functionality 
- - You can always exit the stepper with __0__ to
- choose a(nother) word or select another file
-  Commands to enter:
-    - a number *n* to step forwards in the text by *n* lines
-    - a negative number *-n* to move to a specific line number *n*
-    NOTE: moving to a line beyond the end of the text will exit text step
-    and prompt for a new word or new file
-    
-    - __\<__ and __>__ to skip to the previous or next instance of the given word
-     the program will move to the correct line and
-     indicate the position of the word instance, as well as display
-     the number of words between the new and previous instance and the 
-     word number of the new instance (word *i* in the entire text)
-    - __qa__ or __help__ to display the instructions
-    - __0__ to leave text step for this file (and have the option to choose
-     another word or file, or to list the words in the current file with __lsw__)
-     
+- __0__ to quit the program 
+
+### Text Step and Word Step:
+You are then prompted to start using the text step functionality:
+- enter a word that appears in the text to be able to step
+between instances of the word, press enter or an empty line to
+ignore this functionality 
+- You can always exit the stepper with __0__ to
+choose a(nother) word or select another file
+Commands to enter:
+- a number *n* to step forwards in the text by *n* lines
+- a negative number *-n* to move to a specific line number *n*
+NOTE: moving to a line beyond the end of the text will exit text step
+and prompt for a new word or file
+
+- __<__ and __>__ to skip to the previous or next instance of the given word
+ the program will move to the correct line and
+ indicate the position of the word instance, as well as display
+ the number of words between the new and previous instance and the 
+ word number of the new instance (word *i* in the entire text)
+- __qa__ or __help__ to display the instructions
+- __0__ to leave text step for this file 
+(and have the option to choose another word or file, or to list the words in the current file with __lsw__)
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 ### Possible Explorations:
 Tracking distance relationships between different words as opposed to 
 instances of a specific word only would be interesting.
@@ -111,7 +112,7 @@ to test and use, so the preliminary steps are in-progress.
     finding the longest words in the text or finding all words with a given
     length 
 
-### TEST and OLD VERSIONS
+### Test and Old Versions
 Version 3> 
 - stores positions of the beginning of each line 
 (the index of the starting character with respect to the entire text),
