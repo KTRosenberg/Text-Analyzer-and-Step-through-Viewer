@@ -83,6 +83,7 @@ and prompt for a new word or file
  (and have the option to choose another word or file, or to list the words in the current file with __lsw__)
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Additional Notes
 
 ### Possible Explorations:
 Tracking distance relationships between different words as opposed to 
