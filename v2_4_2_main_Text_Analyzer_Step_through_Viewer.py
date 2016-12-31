@@ -139,8 +139,11 @@ def clean_word(word):
     param: 
         string, word
     return:
-        string, cleaned
+        string, cleaned (None if nothing to clean)
     """
+    
+    if word is None:
+        return None
     
     cleaned = []
     cmp = 0
@@ -596,43 +599,42 @@ def calc_word_analysis(text_file,
             other words or combinations of words)
             NOTE: Currently unused
     return: 
-        dictionary analysis_dict 
+        dictionary analysis_dict[string:[...]]
         (of word_analysis dictionary and optional dictionaries)
-                                (access with analysis_dict["word analysis"]
             list, word_analysis (access with analysis_dict["word analysis"])
-                information pertaining to a specific word in the text,
-                access with analysis_dict["word analysis"]
-                word_analysis[0] (word_analysis[WORD_COUNT])
-                    int (number of instances of the given word in the text)
-                word_analysis[1] (word_analysis[LINE_NUMBERS])
-                    list of int (for each instance of the given word,
-                    stores--in order--the line numbers where the word exists)
-                word_analysis[2] (word_analysis[ITH_WORD_IN_TEXT])
-                    list of int (understand the entire text as a list of words, 
-                        where word i is the ith word in the text,
-                        this list stores the word index i for each instance of 
-                        the given word)
-                word_analysis[3] (word_analysis[ITH_CHAR_ON_LINE])
-                    list of int (understand the entire text as a list of strings 
-                        where each string is a line in the text with indices 
-                        0-length_of_line-1,
-                        this list stores the index of the first character of 
-                        the given word for each instance of the word, 
-                        with respect to its line.
+            information pertaining to a specific word in the text,
+            access with analysis_dict["word analysis"]
+            word_analysis[0] (word_analysis[WORD_COUNT])
+                int (number of instances of the given word in the text)
+            word_analysis[1] (word_analysis[LINE_NUMBERS])
+                list of int (for each instance of the given word,
+                stores--in order--the line numbers where the word exists)
+            word_analysis[2] (word_analysis[ITH_WORD_IN_TEXT])
+                list of int (understand the entire text as a list of words, 
+                    where word i is the ith word in the text,
+                    this list stores the word index i for each instance of 
+                    the given word)
+            word_analysis[3] (word_analysis[ITH_CHAR_ON_LINE])
+                list of int (understand the entire text as a list of strings 
+                    where each string is a line in the text with indices 
+                    0-length_of_line-1,
+                    this list stores the index of the first character of 
+                    the given word for each instance of the word, 
+                    with respect to its line.
 
-                word_analysis      [
-                                        1, 
-                                        [line_count-1], 
-                                        [word_i],
-                                        [pos_on_line]
-                                   ]
+            word_analysis      [
+                                    1, 
+                                    [line_count-1], 
+                                    [word_i],
+                                    [pos_on_line]
+                               ]
 
-                UNUSED/UNCALCULATED (May reuse later):    
-                    word_analysis[4]:
-                        list of int (interpret the entire text as a single 
-                        string with indices 0-length_of_text-1,
-                        this list stores the index of the first character of 
-                        the given word for each instance of the word)
+            UNUSED/UNCALCULATED (May reuse later):    
+                word_analysis[4]:
+                    list of int (interpret the entire text as a single 
+                    string with indices 0-length_of_text-1,
+                    this list stores the index of the first character of 
+                    the given word for each instance of the word)
         
             list[int] text_as_lines (access with analysis_dict["text as lines"])
                 the entire input text divided into lines,
@@ -654,7 +656,7 @@ def calc_word_analysis(text_file,
                     with [%_indentifiable]
 
     """
-    if text_file is None:
+    if text_file is None or in_word_punct is None:
         return None
         
     # dictionary of lists and dictionaries to return
@@ -1101,8 +1103,9 @@ def calc_word_analysis(text_file,
         
     #add specific dictionaries to the analysis dictionary for output
     """
-    # populate word analysis
+    # populate analysis_dict
     
+    # information per unique word
     analysis_dict["word analysis"] = word_analysis
     # text divided into a list of lines
     analysis_dict["text as lines"] = text_as_lines
@@ -1462,7 +1465,7 @@ def calculate_word_info(analysis_dict, output_dict, choices_set):
     NOTE: TESTING THIS FUNCTIONALITY, not used much yet
     
     saves desired information based on analysis dictionary 
-    in an output dictionary
+    in an output dictionary (that is passed to the function--a side-effect)
     
     param:
         dictionary, analysis_dict 
@@ -1553,6 +1556,9 @@ class LenXInfo(WordInfo):
         """
         sets the class key as the concatenation of "word length" 
         and the desired word length, saves the desired length
+        
+        param:
+            int, length (desired length for words to find)
         """
         self.key = "word length " + str(length)
         self.length = length
@@ -1567,21 +1573,76 @@ class LenXInfo(WordInfo):
             list of string (the word(s) with length "length")
         """
         all_words = analysis_dict["word list"]
-        num = self.length
+        l = self.length
         w_len = []
         for w in all_words:
-            if len(w) == num:
+            if len(w) == l:
                 w_len.append(w)
         return w_len
+
+class WordDistCalc(WordInfo):
+    """
+    creates a dictionary that for each word (or word in a given sub-list)
+    stores a list of int distances between each instance of the word in the
+    relevant text
+    """
+    def __init__(self, word_sublist=None):
+        """
+        sets the class key, 
+        stores the sub-list of words for later calculation
+    
+        param (opt.):
+            list[string], word_sublist 
+                (sub-list of words whose distances are desired)
+        """
+        self.key = "word dist"
+        self.word_sublist = word_sublist
         
+    def calculate(self, analysis_dict):
+        """
+        for each word in the relevant text, or optionally only the words
+        specified in the word sub-list, creates a list[int] of distances
+        between instances of the word, stores all lists in a dictionary
+        with a word:list[int] mapping
+    
+        param:
+            dictionary analysis_dict (created from the text)
+            int length (of desired words)
+        return:
+            dictionary[string, list[int]] (mapping of word to instance distances)
+         
+        """
+        if analysis_dict is None:
+            return None
+            
+        if self.word_sublist is None:
+            words = analysis_dict["word list"]
+        else:
+            words = self.word_sublist
+            
+        word_analysis = analysis_dict["word analysis"]
+        dists = {}
+        for word in words:
+            try:
+                word_pos_i = word_analysis[word][ITH_WORD_IN_TEXT]
+            except KeyError:
+                pass
+            else:
+                l = len(word_pos_i)
+                dists[word] = [word_pos_i[i] - word_pos_i[i-1] - 1
+                               for i in range(1, l)]
+                               
+        return dists
         
 def test_info_classes(analysis_dict):
     """
     TESTING WordInfo CLASS
     """
     output_dict = {}
-    calculate_word_info(analysis_dict, output_dict, 
-                        set([LongestInfo(), LenXInfo(1)]))
+    # calculate_word_info(analysis_dict, output_dict, 
+                        # set([LongestInfo(), LenXInfo(1)]))
+    calculate_word_info(analysis_dict, output_dict,
+                        set([WordDistCalc(["be"])]))
     print(output_dict)
     
     
@@ -1601,9 +1662,6 @@ def main():
     """
     
     print(PROGRAM_BANNER, end='')
-    
-    # set options
-    # choices_list = configure()
     
     print("Current working directory: {:}".format(os.getcwd()))
     
@@ -1640,9 +1698,8 @@ def main():
                 text_file.close()
                 
         if success:
-            # test_info_classes(analysis_dict)
             
-            # calculate_info_analysis_dict(analysis_dict)
+            # test_info_classes(analysis_dict)
             
             print("////TEXT STEP VIEWER////\n")
             
