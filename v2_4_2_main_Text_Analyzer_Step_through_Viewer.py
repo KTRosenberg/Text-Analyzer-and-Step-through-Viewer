@@ -7,7 +7,7 @@ import time
 from abc import ABCMeta, abstractmethod
 
 """
-Step-through Text and Word Viewer 
+Step-through Text and Word Viewer
 
 Author: Karl Toby Rosenberg
 
