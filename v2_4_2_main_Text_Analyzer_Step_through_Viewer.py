@@ -1656,7 +1656,7 @@ def main():
                 text_file.close()
                 
         if success:
-            test_info_classes(analysis_dict)
+            # test_info_classes(analysis_dict)
             
             # calculate_info_analysis_dict(analysis_dict)
             
