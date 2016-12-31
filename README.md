@@ -45,8 +45,7 @@ By Karl Toby Rosenberg
  The file name and separator between file and encoding (in the file) can be
  changed by passing optional arguments to the relevant function: 
   __add_file_info_from_file()__
-- __cd__ \<*path*> to change directory
- * This works similarly to the traditional cd command
+- __cd__ \<*path*> to change directory (This simulates the usual cd command)
  - cd sub-commands:
     * __cd__ \<*path*> to continue to change directory
     * __h__ to select the utility's starting home directory
