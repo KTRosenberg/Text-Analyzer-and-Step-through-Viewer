@@ -1,0 +1,2 @@
+/Users/synchronizer/Documents/EDUCATION/0000_NYU/Computer_Science/Summer_Projects_2016/Text_Analyzer_main/0006_Shakespeare_Hamlet.txt ascii
+/Users/synchronizer/Documents/EDUCATION/0000_NYU/Computer_Science/Summer_Projects_2016/Text_Analyzer_main/old_summer_2016/Thoreau_Walden_and_On_the_Duty_of_Civil_Disobedience.txt 2

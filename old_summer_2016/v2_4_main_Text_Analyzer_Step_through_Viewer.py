@@ -4,29 +4,13 @@ import sys
 import os
 import time
 
-#variables for alphabetic characters 
-a_ = 65
-z_ = 90
-A_ = 97
-Z_ = 122
-
 #variables for accessing word_analysis list
 WORDCOUNT   = 0
 LINENUMBERS = 1
 IWORDINTEXT = 2
 ICHARONLINE = 3
-
 #UNUSED
 #ICHARINTEXT = 4
-
-#variables for user input options in text_step and word_step functions
-ENTER = ''
-W_NEXT_INST = '>'
-W_PREV_INST = '<'
-INSTRUCTIONS = 'qa'
-YES = NEXT_LINE = 1
-NO = QUIT = FIRST = 0
-NOMOVE = -1
 
 """
 Karl Toby Rosenberg
@@ -61,14 +45,13 @@ current version June 29, 2016
 """
 #############################
 
-"""
-binary_min_linea_bove_search
 
-given a starting line number and a list of valid line numbers,
-finds and returns the index of the nearest line number greater or equal to the starting line
-returns -1 if there is no such valid line in the correct range
-"""
 def binary_min_line_above_search(line_numbers, low, high, starting_line):
+	"""
+	given a starting line number and a list of valid line numbers,
+	finds and returns the index of the nearest line number greater or equal to the starting line
+	returns -1 if there is no such valid line in the correct range
+	"""
     mid = 0
     index_first_valid_line = high
     if line_numbers[index_first_valid_line] == starting_line:
@@ -91,14 +74,12 @@ def binary_min_line_above_search(line_numbers, low, high, starting_line):
         return -1
     return index_first_valid_line
 
-"""
-binary_max_line_below_search
-
-given a starting line number and a list of valid line numbers,
-finds and returns the index of the nearest line number less than or equal to the starting line
-returns -1 if there is no such valid line in the correct range
-"""
 def binary_max_line_below_search(line_numbers, low, high, starting_line):
+	"""
+	given a starting line number and a list of valid line numbers,
+	finds and returns the index of the nearest line number less than or equal to the starting line
+	returns -1 if there is no such valid line in the correct range
+	"""
     mid = 0
     index_first_valid_line = low
     if line_numbers[index_first_valid_line] == starting_line:
@@ -121,16 +102,22 @@ def binary_max_line_below_search(line_numbers, low, high, starting_line):
         return -1
     return index_first_valid_line
 
-"""
-clean_word
-
-returns string with
-all non-alphabetical characters from given string (word) omitted
-
-params: string word
-return: string cleaned
-"""
 def clean_word(word):
+	"""
+	returns string with
+	all non-alphabetical characters from given string (word) omitted
+
+	params: string word
+	return: string cleaned
+	"""
+	"""
+	#ASCII values for alphabetic characters 
+	a = 65
+	z = 90
+	A = 97
+	Z = 122
+	"""
+	
     cleaned = []
     cmp = 0
     for char in word:
@@ -139,24 +126,31 @@ def clean_word(word):
             cleaned.append(char)
     return ''.join(cleaned)
 
-"""
-is_valid_char
-
-checks whether a given character is alphabetical or a valid non-alphabetical character,
-returns True if valid, else returns False
-"""
 def is_valid_char(char, in_word_punct):
+	"""
+	checks whether a given character is alphabetical or a valid non-alphabetical character,
+	returns True if valid, else returns False
+	
+	param: 
+		string, char (character to check)
+		dictionary, in_word_punct (dictionary 
+	"""
+	"""
+	#ASCII values for alphabetic characters 
+	a = 65
+	z = 90
+	A = 97
+	Z = 122
+	"""
     val = ord(char)
-    if (val >= a_ and val <= z_) or (val >= A_ and val <= Z_) or char in in_word_punct:
+    if (val >= 65 and val <= 90) or (val >= 97 and val <= 122) or char in in_word_punct:
         return True
     return False
 
-"""
-print_instructions
-
-    displays the commands for text_step and word_step functions
-"""
 def print_instructions():
+    """
+    displays the commands for text_step and word_step functions
+    """
     print("TEXT STEP COMMANDS:\n\
     -enter a number n to step by n lines\n\
     -a number -n to skip to a specific line number\n\
@@ -165,50 +159,47 @@ def print_instructions():
     -qa to display the commands again\n\
     -0 to quit\n")
 
-"""
-word_step
-
-    skips to instances of the chosen word within the text,
-    displays number of words skipped with each movement,
-    displays position of each word instance with respect to the "list" of all
-    words in the text
-    
-    enter '<' or '>' to skip to the previous or next instance of the chosen word
-
-    param:
-        list, text_as_lines: 
-            the entire input text divided into lines,
-            where line i is stored in text_as_lines[i-1]
-        list, word_analysis:
-            information pertaining to a specific word in the text:
-            word_analysis[0]:
-                int (number of instances of the given word in the text)
-            word_analysis[1]:
-                list of int (for each instance of the given word,
-                stores--in order--the line numbers on which the word occurred)
-            word_analysis[2]:
-                list of int (understand the entire text as a list of words, where word i is the ith word in the text,
-                this list stores the word index i for each instance of the given word
-            word_analysis[3]:
-                list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
-                this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
-                list with word_analysis[1])
-
-            word_analysis   =   [
-                                    1, 
-                                    [line_count-1], 
-                                    [word_i],
-                                    [pos_on_line]
-                                ]
-
-    optional param: 
-            string, choice:
-                for now word_step is entered only from text_step when the '<' or '>' command 
-                (to step to the previous or the next instance) is entered, but the default choice is now '>'
-
-"""
 def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
+	"""
+	skips to instances of the chosen word within the text,
+	displays number of words skipped with each movement,
+	displays position of each word instance with respect to the "list" of all
+	words in the text
 
+	enter '<' or '>' to skip to the previous or next instance of the chosen word
+
+	param:
+		list, text_as_lines: 
+			the entire input text divided into lines,
+			where line i is stored in text_as_lines[i-1]
+		list, word_analysis:
+			information pertaining to a specific word in the text:
+			word_analysis[0]:
+				int (number of instances of the given word in the text)
+			word_analysis[1]:
+				list of int (for each instance of the given word,
+				stores--in order--the line numbers on which the word occurred)
+			word_analysis[2]:
+				list of int (understand the entire text as a list of words, where word i is the ith word in the text,
+				this list stores the word index i for each instance of the given word
+			word_analysis[3]:
+				list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
+				this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
+				list with word_analysis[1])
+
+			word_analysis   =   [
+									1, 
+									[line_count-1], 
+									[word_i],
+									[pos_on_line]
+								]
+
+	optional param: 
+			string, choice:
+				for now word_step is entered only from text_step when the '<' or '>' command 
+				(to step to the previous or the next instance) is entered, but the default choice is now '>'
+	"""
+	
     line_nums   = word_analysis[LINENUMBERS]
     word_i      = word_analysis[IWORDINTEXT]
     pos_on_line = word_analysis[ICHARONLINE] 
@@ -341,44 +332,51 @@ def word_step(text_as_lines, word_analysis, starting_line, choice='>'):
     print("End of file reached at L" + str(current_line) + '\n')
     return 0, 0
 
-"""
-text_step
 
-    step-through lines in the text,
-        enter a positive number n to display and step forward by n lines
-        enter a negative number -n to skip to line number |-n|
-        enter '<' or '>' to skip to the previous or next instance of the chosen word (see word_step() )
-        (whose word_analysis list is passed to text_step() )
-        enter "qa" to display the instructions
-        enter 0 to exit
-    param:
-        list, text_as_lines: 
-            the entire input text divided into lines,
-            where line i is stored in text_as_lines[i-1]
-        list, word_analysis:
-            information pertaining to a specific word in the text:
-            word_analysis[0]:
-                int (number of instances of the given word in the text)
-            word_analysis[1]:
-                list of int (for each instance of the given word,
-                stores--in order--the line numbers on which the word occurred)
-            word_analysis[2]:
-                list of int (understand the entire text as a list of words, where word i is the ith word in the text,
-                this list stores the word index i for each instance of the given word
-            word_analysis[3]:
-                list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
-                this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
-                list with word_analysis[1])
-
-            word_analysis   =   [
-                                    1, 
-                                    [line_count-1], 
-                                    [word_i],
-                                    [pos_on_line]
-                                ]
-
-"""
 def text_step(text_as_lines, word_analysis):
+	"""
+	step-through lines in the text,
+		enter a positive number n to display and step forward by n lines
+		enter a negative number -n to skip to line number |-n|
+		enter '<' or '>' to skip to the previous or next instance of the chosen word (see word_step() )
+		(whose word_analysis list is passed to text_step() )
+		enter "qa" to display the instructions
+		enter 0 to exit
+	param:
+		list, text_as_lines: 
+			the entire input text divided into lines,
+			where line i is stored in text_as_lines[i-1]
+		list, word_analysis:
+			information pertaining to a specific word in the text:
+			word_analysis[0]:
+				int (number of instances of the given word in the text)
+			word_analysis[1]:
+				list of int (for each instance of the given word,
+				stores--in order--the line numbers on which the word occurred)
+			word_analysis[2]:
+				list of int (understand the entire text as a list of words, where word i is the ith word in the text,
+				this list stores the word index i for each instance of the given word
+			word_analysis[3]:
+				list of int (understand the entire text as a list of strings where each string is a line in the text with indices 0-length_of_line-1,
+				this list stores the index of the first character of the given word for each instance of the word, with respect to its line. Use this
+				list with word_analysis[1])
+
+			word_analysis   =   [
+									1, 
+									[line_count-1], 
+									[word_i],
+									[pos_on_line]
+								]
+	"""
+	
+	#variables for user input options in text_step and word_step functions
+	ENTER = ''
+	W_NEXT_INST = '>'
+	W_PREV_INST = '<'
+	INSTRUCTIONS = 'qa'
+	YES = NEXT_LINE = 1
+	NO = QUIT = FIRST = 0
+	NOMOVE = -1
 
     total_lines = len(text_as_lines)
 
@@ -478,17 +476,22 @@ def text_step(text_as_lines, word_analysis):
 #True if function call is the first one of the current session
 text_step.first_time = True
 
-
-"""
-calc_w_analysis
-
+def calc_w_analysis(
+text_file, 
+max_len=0, 
+trivial=1, trivial_list=[], 
+gender=0, gender_terms=[], 
+mood=0, mood_terms=[], 
+in_word_punct={"'", '-', u"’"},
+eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]}
+):
+	"""
     calculates word frequencies given a text string,
     can find additional (optional) information, ignore trivial words, ignore words above a certain length,
     other possibilities are a work-in-progress
 
     param: file text_file (the file object representing the chosen text)
     optional params: pass 1 or 0 to specify option, or specify a list of words for a list parameter
-        clean: clean text/words
         max_len: omit words of length greater than max_len
         trivial: omit trivial words
         trivial_list: specifies a list of trivial words
@@ -500,7 +503,7 @@ calc_w_analysis
             stores another dictionary in list of dictionaries returned from function,
             contains counts and percentages for happy and sad
         mood_terms: specifies a list of happy or sad words
-        in_word_punct: list of acceptable in-word punctuation
+        in_word_punct: set of acceptable in-word punctuation
     
     return: 
         dictionary analysis_dict of word_analysis dictionary and optional dictionaries
@@ -548,17 +551,7 @@ calc_w_analysis
                     access percentages with [%_:D] and [%_D:]
                     access percent of words identifiable as happy or sad with [%_indentifiable]
 
-"""
-def calc_w_analysis(
-text_file, 
-clean=0, 
-max_len=0, 
-trivial=1, trivial_list=[], 
-gender=0, gender_terms=[], 
-mood=0, mood_terms=[], 
-in_word_punct=["'", '-', u"’"],
-eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not"], "shouldn't":["should", "not"]}
-):
+	"""
     
     #dictionary of lists and dictionaries to return
     analysis_dict = {}
@@ -592,292 +585,251 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #given text, create a word frequency dictionary of words in all_text stripped of invalid punctuation,
     #records word positions, line positions, number of words between instances of a given word
     #for use with text_step and word_step
-    if clean:
-        #track the number of characters reached so far with respect to the current line
-        char_count_line = -1
+    
+    ###########################################################  
+	#track the number of characters reached so far with respect to the current line
+	char_count_line = -1
 
-        #UNUSED
-        #track the number of characters reached so far with respect to the whole text
-        #char_count_text = -1
+	#UNUSED
+	#track the number of characters reached so far with respect to the whole text
+	#char_count_text = -1
 
-        #counter tracks whether multiple punctuation marks appear in a row,
-        #used to allow words with interior punctuation (e.g. hyphen: good-natured) 
-        #but does not allow words with multiple punctuation or non-alphabetical characters in a row
-        double_punct = 0
-        #marks a word as alphabetical
-        has_alpha = False
-        #save a puffer of punctuation marks to allow for in-word punctuation
-        #without adding punctuation immediately after the word
-        punct_buffer = []
-        #save reference to punct_buffer.append
-        punct_buffer_append_ = punct_buffer.append
-        #count the line number according to '\n' characters in text
-        line_count = 1
-        
-        #count the number of words found
-        word_i = 0
+	#counter tracks whether multiple punctuation marks appear in a row,
+	#used to allow words with interior punctuation (e.g. hyphen: good-natured) 
+	#but does not allow words with multiple punctuation or non-alphabetical characters in a row
+	double_punct = 0
+	#marks a word as alphabetical
+	has_alpha = False
+	#save a puffer of punctuation marks to allow for in-word punctuation
+	#without adding punctuation immediately after the word
+	punct_buffer = []
+	#save reference to punct_buffer.append
+	punct_buffer_append_ = punct_buffer.append
+	#count the line number according to '\n' characters in text
+	line_count = 1
 
-        #word start index with respect to lines
-        pos_on_line = 0
+	#count the number of words found
+	word_i = 0
 
-        #UNUSED
-        #word start index with respect to text
-        #pos_in_text = 0
-        
-        #read the first line
-        line = text_file.readline()
-        #iterate as long as another line exists in the text
-        while line:
-            #store the line in the text
-            text_as_lines_append_(line)
-            #iterate through each character in the input text
-            for char in line:
-                char_count_line += 1
+	#word start index with respect to lines
+	pos_on_line = 0
 
-                #UNUSED
-                #char_count_text += 1
-                        
-                #if char is new-line, 
-                if char == '\n':
-                    #reset the number of characters reached with respect to the line
-                    char_count_line = -1
-                    #increment the line count
-                    line_count += 1
-            
-                #if the char is not alphabetic,
-                #continue to the next character if the current word under construction
-                #has no alphabetic characters (words must begin with an alphabetic character)
-                if has_alpha == False and isalpha_(char) == False:
-                    continue
-            
-                #treat alphabetic characters
-                if isalpha_(char):
-                    #if the current word under construction
-                    #has no alphabetical characters so far (is empty),
-                    #mark the starting position of the word, mark the word as alphabetic
-                    if has_alpha == False:
-                        pos_on_line = char_count_line
+	#UNUSED
+	#word start index with respect to text
+	#pos_in_text = 0
 
-                        #UNUSED
-                        #pos_in_text = char_count_text
+	#read the first line
+	line = text_file.readline()
+	#iterate as long as another line exists in the text
+	while line:
+		#store the line in the text
+		text_as_lines_append_(line)
+		#iterate through each character in the input text
+		for char in line:
+			char_count_line += 1
 
-                        has_alpha = True
-                    #if characters are waiting in the punctuation buffer,
-                    #first append them to the word under construction, then clear the buffer
-                    if len(punct_buffer) > 0:
-                        new_word_append_(''.join(punct_buffer))
-                        del punct_buffer[:]
-                    #append the current alphabetic character to the word under construction
-                    new_word_append_(lower_(char))
-                    #reset the punctuation-in-a-row counter to 0 since the alphabetic character ends the streak 
-                    double_punct = 0
-                #treat valid punctuation/characters
-                elif char in in_word_punct:
-                    #if the punctuation-in-a-row counter is 0,
-                    #append the current punctuation/valid non-alphabetic mark to the punctuation buffer
-                    #and increment the punctuation-in-a-row counter
-                    #-punctuation is not added immediately in case, for example,
-                    #the current character is a hyphen, which can be safely added in the middle of a word,
-                    #but cannot be added at the end of one.
-                    #The hyphen is not added to the end of a word, as the word is considered complete before it can be (incorrectly) added.
-                    if double_punct == 0:
-                        punct_buffer_append_(char)
-                    double_punct += 1
+			#UNUSED
+			#char_count_text += 1
+				
+			#if char is new-line, 
+			if char == '\n':
+				#reset the number of characters reached with respect to the line
+				char_count_line = -1
+				#increment the line count
+				line_count += 1
+	
+			#if the char is not alphabetic,
+			#continue to the next character if the current word under construction
+			#has no alphabetic characters (words must begin with an alphabetic character)
+			if has_alpha == False and isalpha_(char) == False:
+				continue
+	
+			#treat alphabetic characters
+			if isalpha_(char):
+				#if the current word under construction
+				#has no alphabetical characters so far (is empty),
+				#mark the starting position of the word, mark the word as alphabetic
+				if has_alpha == False:
+					pos_on_line = char_count_line
 
-                #the current word has been completed if:
-                #the punctuation-in-a-row counter is set to 2 (words cannot have multiple punctuation marks in a row)
-                #or the character is not alphabetic or an otherwise valid punctuation mark or character
-                if double_punct == 2 or is_valid_char(char, in_word_punct) == False:
-                
-                    #clear the punctuation buffer
-                    del punct_buffer[:]
-                    #reset the punctuation-in-a-row count
-                    double_punct = 0
-                    #reset has_alpha to prepare for the next round of valid word-checking
-                    has_alpha = False
-                    #(an additional check) make sure that the new word has a valid length
-                    if len(new_word) > 0:
-                        #a new word has been completed, increment the word counter
-                        word_i += 1
-                        #saved the characters in new_word as a joined_word
-                        joined_word = ''.join(new_word)
-                    
-                        #if the new word has not been added to the dictionary and the word is alphabetical,
-                        #add an entry for the word in the word list and in the dictionary with a count of 1
-                        if joined_word not in word_analysis:
+					#UNUSED
+					#pos_in_text = char_count_text
 
-                            #integer representing the total word count for the given word,
-                            #list of line numbers on which the word appears,
-                            #list of the positions of each instance of the word with respect to the list of words in the entire text
-                            #list of the positions of the first char for each instance of the word with respect to the entire text,
-                            #list of the positions of the first char for each instance of the word with respect to the current line in the text,
+					has_alpha = True
+				#if characters are waiting in the punctuation buffer,
+				#first append them to the word under construction, then clear the buffer
+				if len(punct_buffer) > 0:
+					new_word_append_(''.join(punct_buffer))
+					del punct_buffer[:]
+				#append the current alphabetic character to the word under construction
+				new_word_append_(lower_(char))
+				#reset the punctuation-in-a-row counter to 0 since the alphabetic character ends the streak 
+				double_punct = 0
+			#treat valid punctuation/characters
+			elif char in in_word_punct:
+				#if the punctuation-in-a-row counter is 0,
+				#append the current punctuation/valid non-alphabetic mark to the punctuation buffer
+				#and increment the punctuation-in-a-row counter
+				#-punctuation is not added immediately in case, for example,
+				#the current character is a hyphen, which can be safely added in the middle of a word,
+				#but cannot be added at the end of one.
+				#The hyphen is not added to the end of a word, as the word is considered complete before it can be (incorrectly) added.
+				if double_punct == 0:
+					punct_buffer_append_(char)
+				double_punct += 1
 
-                            #add an entry for the joined_word
-                            if char == '\n':
-                                #if the current character is a new-line character, the line-count is off by +1
-                                word_analysis[joined_word] =    [
-                                                                    1, 
-                                                                    [line_count-1], 
-                                                                    [word_i], 
-                                                                    [pos_on_line]#,
-                                                                    #[pos_in_text] 
-                                                                ]
-                            else:
-                                word_analysis[joined_word] =    [
-                                                                    1, 
-                                                                    [line_count], 
-                                                                    [word_i], 
-                                                                    [pos_on_line]#,
-                                                                    #[pos_in_text]
-                                                                ]
+			#the current word has been completed if:
+			#the punctuation-in-a-row counter is set to 2 (words cannot have multiple punctuation marks in a row)
+			#or the character is not alphabetic or an otherwise valid punctuation mark or character
+			if double_punct == 2 or is_valid_char(char, in_word_punct) == False:
+		
+				#clear the punctuation buffer
+				del punct_buffer[:]
+				#reset the punctuation-in-a-row count
+				double_punct = 0
+				#reset has_alpha to prepare for the next round of valid word-checking
+				has_alpha = False
+				#(an additional check) make sure that the new word has a valid length
+				if len(new_word) > 0:
+					#a new word has been completed, increment the word counter
+					word_i += 1
+					#saved the characters in new_word as a joined_word
+					joined_word = ''.join(new_word)
+			
+					#if the new word has not been added to the dictionary and the word is alphabetical,
+					#add an entry for the word in the word list and in the dictionary with a count of 1
+					if joined_word not in word_analysis:
 
-                            #add new word to word list
-                            word_list_append(joined_word)
-                    
-                        #else if the new word has already been added to the dictionary,
-                        #increment the frequency count and other information for that word
-                        else:
-                            #access the in-progress word data
-                            word_data = word_analysis[joined_word]
-                            #increment the word frequency count
-                            word_data[WORDCOUNT] += 1
-                            #append the next valid line number
-                            if char == '\n':
-                                word_data[LINENUMBERS].append(line_count-1)
-                            else:
-                                word_data[LINENUMBERS].append(line_count)
-                        
-                            #append the ith word value for the current instance of the word
-                            word_data[IWORDINTEXT].append(word_i)
-                            #append the starting position/index of the current word instance with respect to the current line
-                            word_data[ICHARONLINE].append(pos_on_line)
+						#integer representing the total word count for the given word,
+						#list of line numbers on which the word appears,
+						#list of the positions of each instance of the word with respect to the list of words in the entire text
+						#list of the positions of the first char for each instance of the word with respect to the entire text,
+						#list of the positions of the first char for each instance of the word with respect to the current line in the text,
 
-                            #UNUSED
-                            #append the starting position/index of the current word instance with respect to the whole text
-                            #word_data[ICHARINTEXT].append(pos_in_text)
+						#add an entry for the joined_word
+						if char == '\n':
+							#if the current character is a new-line character, the line-count is off by +1
+							word_analysis[joined_word] =    [
+																1, 
+																[line_count-1], 
+																[word_i], 
+																[pos_on_line]#,
+																#[pos_in_text] 
+															]
+						else:
+							word_analysis[joined_word] =    [
+																1, 
+																[line_count], 
+																[word_i], 
+																[pos_on_line]#,
+																#[pos_in_text]
+															]
 
-                    #reset the word string
-                    del new_word[:]
-            #try to read the next line
-            line = text_file.readline()
+						#add new word to word list
+						word_list_append(joined_word)
+			
+					#else if the new word has already been added to the dictionary,
+					#increment the frequency count and other information for that word
+					else:
+						#access the in-progress word data
+						word_data = word_analysis[joined_word]
+						#increment the word frequency count
+						word_data[WORDCOUNT] += 1
+						#append the next valid line number
+						if char == '\n':
+							word_data[LINENUMBERS].append(line_count-1)
+						else:
+							word_data[LINENUMBERS].append(line_count)
+				
+						#append the ith word value for the current instance of the word
+						word_data[IWORDINTEXT].append(word_i)
+						#append the starting position/index of the current word instance with respect to the current line
+						word_data[ICHARONLINE].append(pos_on_line)
 
-        #the following checks whether there are any trailing characters,
-        #I may remove the check and encourage the user to end a file with a new-line
-        if len(new_word) > 0:
-            #a new word has been completed, increment the word counter
-            word_i += 1
-            #saved the characters in new_word as a joined_word
-            joined_word = ''.join(new_word)
-        
-            #if the new word has not been added to the dictionary and the word is alphabetical,
-            #add an entry for the word in the word list and in the dictionary with a count of 1
-            if joined_word not in word_analysis:
+						#UNUSED
+						#append the starting position/index of the current word instance with respect to the whole text
+						#word_data[ICHARINTEXT].append(pos_in_text)
 
-                #integer representing the total word count for the given word,
-                #list of line numbers on which the word appears,
-                #list of the positions of each instance of the word with respect to the list of words in the entire text
-                #list of the positions of the first char for each instance of the word with respect to the entire text,
-                #list of the positions of the first char for each instance of the word with respect to the current line in the text,
+				#reset the word string
+				del new_word[:]
+		#try to read the next line
+		line = text_file.readline()
 
-                #add an entry for the joined_word
-                if char == '\n':
-                    #if the current character is a new-line character, the line-count is off by +1
-                    word_analysis[joined_word] =    [
-                                                        1, 
-                                                        [line_count-1], 
-                                                        [word_i], 
-                                                        [pos_on_line]#,
-                                                        #[pos_in_text] 
-                                                    ]
-                else:
-                    word_analysis[joined_word] =    [
-                                                        1, 
-                                                        [line_count], 
-                                                        [word_i], 
-                                                        [pos_on_line]#,
-                                                        #[pos_in_text]
-                                                    ]
+	#the following checks whether there are any trailing characters,
+	#I may remove the check and encourage the user to end a file with a new-line
+	if len(new_word) > 0:
+		#a new word has been completed, increment the word counter
+		word_i += 1
+		#saved the characters in new_word as a joined_word
+		joined_word = ''.join(new_word)
 
-                #add new word to word list
-                word_list_append(joined_word)
-        
-            #else if the new word has already been added to the dictionary,
-            #increment the frequency count and other information for that word
-            else:
-                #access the in-progress word data
-                word_data = word_analysis[joined_word]
-                #increment the word frequency count
-                word_data[WORDCOUNT] += 1
-                #append the next valid line number
-                if char == '\n':
-                    word_data[LINENUMBERS].append(line_count-1)
-                else:
-                    word_data[LINENUMBERS].append(line_count)
-            
-                #append the ith word value for the current instance of the word
-                word_data[IWORDINTEXT].append(word_i)
-                #append the starting position/index of the current word instance with respect to the current line
-                word_data[ICHARONLINE].append(pos_on_line)
+		#if the new word has not been added to the dictionary and the word is alphabetical,
+		#add an entry for the word in the word list and in the dictionary with a count of 1
+		if joined_word not in word_analysis:
+
+			#integer representing the total word count for the given word,
+			#list of line numbers on which the word appears,
+			#list of the positions of each instance of the word with respect to the list of words in the entire text
+			#list of the positions of the first char for each instance of the word with respect to the entire text,
+			#list of the positions of the first char for each instance of the word with respect to the current line in the text,
+
+			#add an entry for the joined_word
+			if char == '\n':
+				#if the current character is a new-line character, the line-count is off by +1
+				word_analysis[joined_word] =    [
+													1, 
+													[line_count-1], 
+													[word_i], 
+													[pos_on_line]#,
+													#[pos_in_text] 
+												]
+			else:
+				word_analysis[joined_word] =    [
+													1, 
+													[line_count], 
+													[word_i], 
+													[pos_on_line]#,
+													#[pos_in_text]
+												]
+
+			#add new word to word list
+			word_list_append(joined_word)
+
+		#else if the new word has already been added to the dictionary,
+		#increment the frequency count and other information for that word
+		else:
+			#access the in-progress word data
+			word_data = word_analysis[joined_word]
+			#increment the word frequency count
+			word_data[WORDCOUNT] += 1
+			#append the next valid line number
+			if char == '\n':
+				word_data[LINENUMBERS].append(line_count-1)
+			else:
+				word_data[LINENUMBERS].append(line_count)
+	
+			#append the ith word value for the current instance of the word
+			word_data[IWORDINTEXT].append(word_i)
+			#append the starting position/index of the current word instance with respect to the current line
+			word_data[ICHARONLINE].append(pos_on_line)
 
 
-        #append a guard new-line character if the text does not end with a new-line character
-        if len(text_as_lines) > 0:
-            final_line_index = len(text_as_lines) - 1 
-            len_final_line = len(text_as_lines[final_line_index])
-            if len_final_line > 0:
-                text_as_lines[final_line_index] += '\n'
-            else:
-                text_as_lines[final_line_index] = '\n'
-        else:
-            text_as_lines_append_('\n')
-                
+	#append a guard new-line character if the text does not end with a new-line character
+	if len(text_as_lines) > 0:
+		final_line_index = len(text_as_lines) - 1 
+		len_final_line = len(text_as_lines[final_line_index])
+		if len_final_line > 0:
+			text_as_lines[final_line_index] += '\n'
+		else:
+			text_as_lines[final_line_index] = '\n'
+	else:
+		text_as_lines_append_('\n')
+		
 
-        
-        #print(word_analysis)
-        #print('cleaned\n')
-    #CAUTION, NON-CLEANED VERSION NEEDS TO BE RE-TESTED
-    #create a word frequency dictionary of words in text_file including punctuation
-    else:
-        #hasalpha_w is true if the current word under construction has an alphabetical character
-        #this prevents non-words such as a hyphen '-' from being recognized as words
-        hasalpha_w = False
-        #save reference to str.isspace()
-        _is_space = str.isspace
 
-        #read the first line
-        line = text_file.readline()
-        #iterate as long as another line exists in the text
-        while line:
-        #iterate through each character in the input text
-            for char in line:
-                #if the current word under construction has no alphabetical characters
-                #and the character is alphabetical, set hasalpha_w to True 
-                if hasalpha_w == False and isalpha_(char):
-                    hasalpha_w = True
-                #if the character has no whitespace and is not the empty string,
-                #add the character to the word under construction
-                if _is_space(char) == False and char != '':
-                    new_word_append_(lower_(char))
-                #else check whether the current string is a completed word
-                else:
-                    #check the current string only if it has at least one alphabetical character
-                    if hasalpha_w:
-                        joined_word = ''.join(new_word)
-                        #if the new word has not been added to the dictionary,
-                        #add an entry for the word in the word list and in the dictionary with a count of 1
-                        if joined_word not in word_analysis:
-                            word_list_append(joined_word)
-                            word_analysis[joined_word] = [1]
-                        #else if the new word has already been added to the dictionary,
-                        #increment the frequency count for that word
-                        elif joined_word in word_analysis:
-                            word_analysis[joined_word][0] += 1
-                    #reset the word string
-                    del new_word[:]
-                    hasalpha_w = False
-            line = text_file.readline()
-        #print(word_analysis)
-        #print('not cleaned\n')
+	#print(word_analysis)
+	#print('cleaned\n')
+
 
     ####################################
 
@@ -1004,15 +956,13 @@ eq_words={"can't":["can", "not"], "cannot":["can", "not"], "won't":["will", "not
     #return the analysis dictionary
     return analysis_dict
 
-"""
-configure
-
-choose settings for analysis
-
-returns the list of choices
-"""
 def configure():
-    #list of option strings for prompt, answers to questions stored as 1 or 0 in choices_list
+	"""
+	choose settings for analysis
+
+	returns the list of choices made
+	"""
+    # list of option strings for prompt, answers to questions stored as 1 or 0 in choices_list
     prompt_list = [            
                     "Clean text? (enter or 1/0) ",
                     "Specify a maximum word length? (enter 0 for no limit or a positive number) ", 
@@ -1020,29 +970,77 @@ def configure():
                     "Analyze gender? (enter or 1/0) ", 
                     "Analyze mood? (enter or 1/0) "
                     ]
+    
     #list of default on/off choices for calc_w_frequency function
     choices_list = [0, 0, 0, 0, 0]
+    choices_keys = ["clean", "max_len", "list_trivial", "gender", "mood"]
+    choices_set = {}
+    
     #cycle through options in prompt,
     #set all settings by updating the values in choice_list according to the user's choices
     count = 0
     for option in prompt_list:
         valid_choice = False
+        choice_key = choices_keys[count]
         while valid_choice == False:
             choice = input(option).lower()
             if choice == ENTER:
-                choices_list[count] = 1
+                choices_list[count] = 1                
                 valid_choice = True
-            elif choice.isnumeric():
+            	
+            	choices_set.add(choice_key) # <------------
+            elif choice.isdigit():
                 choices_list[count] = int(choice)
                 valid_choice = True
-            elif choice == '0':
-                valid_choice = True
+                
+                if choice == '1':
+                	choices_set.add(choice_key) # <------------
             else:
                 print("Please select a valid option\n")
+        
+        choices_set.add(choice_key) # <------------
         count += 1
 
     #return the updated list of choices
     return choices_list
+    
+def set_directory(arg=None):
+	"""
+	set the working directory in which desired input files are located
+	
+	param:
+		string arg=None (by default program not given arguments, but if an arg is given, it should be the absolute path name)
+	"""
+	
+	ENTER = ''
+
+	input_incomplete = True 
+	if arg:
+		try:
+			os.chdir(arg)
+		except:
+			print("Directory invalid, please choose a valid directory\n")
+		else:
+			input_incomplete = False
+	
+	while input_incomplete:
+		option = input("Specify a working directory. Options:\nPress enter for the default directory\nThe full path\ncd <path> to change directory\n0 to exit the program")
+		if option == ENTER:
+			try:
+				os.chdir(os.path.dirname(os.path.realpath(__file__)))
+			except:
+				print("ERROR, directory not found, try again")
+		elif option == '0':
+			sys.exit(0)
+		else:
+			if len(option) > 3 and option[:3] == "cd ":
+				option = option[:3]
+			try:
+				os.chdir(option)
+			except:
+				print("Directory invalid, please choose a valid directory\n")
+		
+    print(os.getcwd())
 
 """""""""""""""""""""
 MAIN
@@ -1051,58 +1049,53 @@ def main():
 
     """
     USER OPTIONS:
-    set directory, function options, and file - default options available
+    set / confirm directory, function options, and file - default options available
     """
-
+    ENTER = ''
+	YES = 1
+	NO = QUIT = 0
+	
+	# TODO
+	# choices_dict = {} <----------------------
+	
+	
     choices_list = []
     input_incomplete = True
 
-    #confirm or set the working directory
-    while input_incomplete:
-        option = input("Specify a working directory. Press enter for the default directory: ")
-        if option == ENTER:
-            try:
-                os.chdir(os.path.dirname(os.path.realpath(__file__)))
-            except:
-                option = input("ERROR, would you like to retry? (1 or enter/0): ")
-                if option == ENTER or option == '1':
-                    continue
-                sys.exit("quitting")
-        else:
-            try:
-                os.chdir(option)
-            except:
-                print("Directory invalid, please select the default working directory or choose a valid directory\n")
-                continue
-        print(os.getcwd())
+    # set the working directory
+    if len(sys.argv) > 2:
+		set_directory(sys.argv[1])
+	else:
+		set_directory()
     
-        #set text analysis options to default or configure them
-        while input_incomplete:
-            option = input("Set all to default? (enter or 1/0): ")
-            if option == ENTER or option == '1':
-                choices_list.extend([1,0,1,1,1])
-            elif option == '0':
-                choices_list.extend(configure())
-            else:
-                print("Please choose a valid option.\n")
-                continue
-            input_incomplete = False
+	# set text analysis options to default or configure them
+	while input_incomplete:
+		option = input("Set all to default? (enter or 1/0): ")
+		if option == ENTER or option == '1':
+			choices_list.extend([1,0,1,1,1])
+		elif option == '0':
+			choices_list.extend(configure())
+		else:
+			print("Please choose a valid option.\n")
+			continue
+		input_incomplete = False
 
+	sys.exit("WEE") # <-- temp
     """
     FILE SELECTION, OPEN FILE FOR READING
     """
 
-    #stores the input text file
+    # stores the input text file
     text_file = ''
     
-    #option/loop checks
+    # option/loop checks
     try_new_file = False
     choose_file = True
     
-    #file selection prompt
+    # file selection prompt
     option = input("Enter '1' or the enter key to choose a file,\notherwise enter '0' or another key to choose the default file (must be named 'default.txt'): ")
 
-    #default file selection
+    # default file selection
     if option != ENTER and option != '1':
         try:
             text_file = open("default.txt", 'r')
@@ -1115,7 +1108,7 @@ def main():
         try_new_file = True
 
     if choose_file:
-        #display files in current directory
+        # display files in current directory
         print("\nFILES:\n")
         file_options = next(os.walk(os.getcwd()))[2]
         count = 0
@@ -1124,7 +1117,7 @@ def main():
             count += 1
         print("\n")
     
-    #try to open a file (specified with an index) and its encoding
+    # try to open a file (specified with an index) and its encoding
     while choose_file:
 
         if try_new_file:
@@ -1151,10 +1144,10 @@ def main():
             sys.exit("quitting")
         try_new_file = False
 
-    #try to read the text file
+    # try to read the text file
     try:
-        #call calc_w_analysis() and save the analysis list that it returns
-        analysis_dict = calc_w_analysis(text_file, choices_list[0], choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
+        # call calc_w_analysis() and save the analysis list that it returns
+        analysis_dict = calc_w_analysis(text_file, choices_list[1], choices_list[2], [], choices_list[3], [], choices_list[4], [])  
     except:
         sys.exit("ERROR: cannot read file")
 
@@ -1171,7 +1164,7 @@ def main():
     
     print("////All Words in List////\n\n")
     all_words = analysis_dict["word list"]
-    #track the longest word
+    # track the longest word
     w_longest = []
     len_longest = 0
     for w in all_words:
@@ -1192,7 +1185,7 @@ def main():
     count = 0
     line_number = 0
     format_start = '{:<' + str(len_longest) + '} {:>'
-    #format words and counts nicely
+    # format words and counts nicely
     for word in sorted(word_analysis.keys()):
         count = word_analysis[word][WORDCOUNT]
 
@@ -1227,8 +1220,8 @@ def main():
         print("percent of text identified as either happy or sad: " + str(mood_stat['%_indentifiable']) + '\n\n')
     
     
-    #step through the text and between instances of a chosen word that appears in the text
-    #(currently only with a cleaned text)
+    # step through the text and between instances of a chosen word that appears in the text
+    # (currently only with a cleaned text)
     if choices_list[0] == 1:
         print("////Step through Text////\n")
         prompt = True
@@ -1247,7 +1240,7 @@ def main():
             else:
                 print("Error: word cannot be found\n")
     
-#main function
+# main function
 if __name__ == "__main__":
     try:
         main()
