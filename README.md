@@ -1,5 +1,5 @@
 # Text-Analyzer-and-Step-through-Viewer (Main version v2_4_2)
-The project is a utility to navigate an input text and examine the usage, 
+Text-Analyzer-and-Step-through-Viewer is a utility to navigate an input text and examine the usage, 
 repetition, and proximity of words.
 The viewer can jump forwards and backwards in an input text by line or 
 between instances of particular words to see distances between those 
