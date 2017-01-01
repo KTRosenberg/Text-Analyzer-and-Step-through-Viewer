@@ -666,6 +666,8 @@ def calc_word_analysis(text_file,
     word_analysis = {}
     # word list
     word_list = []
+    # word sequence (duplicates allowed)
+    word_seq = []
 
     # dictionary of gender word counts (-1 counts if unused)
     # gender_stat = {'m':-1, 'f':-1}
@@ -674,6 +676,8 @@ def calc_word_analysis(text_file,
     
     # save reference to word_list.append
     word_list_append_ = word_list.append
+    # save reference to word_seq.append
+    word_seq_append_ = word_seq.append
     # save reference to str.lower()
     lower_ = str.lower
     # save reference to str.isalpha()
@@ -821,7 +825,7 @@ def calc_word_analysis(text_file,
                     # a new word has been completed, increment the word counter
                     word_i += 1
                     # saved the characters in new_word as a joined_word
-                    joined_word = ''.join(new_word)
+                    joined_word = sys.intern(''.join(new_word))
             
                     # if the new word has not been added to the dictionary
                     # and the word is alphabetical,
@@ -864,7 +868,6 @@ def calc_word_analysis(text_file,
 
                         # add new word to word list
                         word_list_append_(joined_word)
-            
                     # else if the new word has already been 
                     # added to the dictionary,
                     # increment the frequency count
@@ -892,6 +895,7 @@ def calc_word_analysis(text_file,
                         # current word instance with respect to the whole text
                         # word_data[ICHARINTEXT].append(pos_in_text)
 
+                word_seq_append_(joined_word)
                 # reset the word string
                 del new_word[:]
         # try to read the next line
@@ -905,7 +909,7 @@ def calc_word_analysis(text_file,
         # a new word has been completed, increment the word counter
         word_i += 1
         # saved the characters in new_word as a joined_word
-        joined_word = ''.join(new_word)
+        joined_word = sys.intern(''.join(new_word))
 
         # if the new word has not been added to the dictionary 
         # and the word is alphabetical,
@@ -967,6 +971,9 @@ def calc_word_analysis(text_file,
             # append the starting position/index of the current word instance
             # with respect to the current line
             word_data[ITH_CHAR_ON_LINE].append(pos_on_line)
+        
+        word_seq_append_(joined_word)
+
 
 
     # if the text does not end with a new-line character
@@ -1111,6 +1118,10 @@ def calc_word_analysis(text_file,
     analysis_dict["text as lines"] = text_as_lines
     # word list
     analysis_dict["word list"] = word_list
+    # all words in sequence
+    analysis_dict["word seq"] = word_seq
+    # number of words in next
+    analysis_dict["total words"] = word_i+1
     
     # gender statistics
     # analysis_dict["gender stat"] = gender_stat
@@ -1634,6 +1645,37 @@ class WordDistCalc(WordInfo):
                                
         return dists
         
+class WordNeighbors(WordInfo):
+
+    def __init__(self):
+        self.key = "word neighbors"
+        
+    def calculate(self, analysis_dict):
+        if analysis_dict is None:
+            return None
+            
+        word_seq = analysis_dict["word seq"]
+        length = len(word_seq)
+        neighbors = {}
+        prev = None
+        next = None
+        for i in range(length):
+            word = word_seq[i]
+            try:
+                next = word_seq[i+1]
+            except IndexError:
+                next = None
+                
+            try:
+                neighbors[word][0].add(prev)
+                neighbors[word][1].add(next)
+            except KeyError:
+                neighbors[word] = [set([prev]), set([next])]
+                
+            prev = word
+                
+        return neighbors
+        
 def test_info_classes(analysis_dict):
     """
     TESTING WordInfo CLASS
@@ -1641,9 +1683,11 @@ def test_info_classes(analysis_dict):
     output_dict = {}
     # calculate_word_info(analysis_dict, output_dict, 
                         # set([LongestInfo(), LenXInfo(1)]))
+    # calculate_word_info(analysis_dict, output_dict,
+                        # set([WordDistCalc(["be"])]))
     calculate_word_info(analysis_dict, output_dict,
-                        set([WordDistCalc(["be"])]))
-    print(output_dict)
+                        set([WordNeighbors()]))
+    print(output_dict["word neighbors"])
     
     
 """
@@ -1699,7 +1743,7 @@ def main():
                 
         if success:
             
-            # test_info_classes(analysis_dict)
+            test_info_classes(analysis_dict)
             
             print("////TEXT STEP VIEWER////\n")
             
