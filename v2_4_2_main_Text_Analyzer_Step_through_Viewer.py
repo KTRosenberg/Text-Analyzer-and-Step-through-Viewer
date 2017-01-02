@@ -1716,7 +1716,7 @@ class WordNeighbors(WordInfo):
                 neighbors[word][0].append(prev)
                 neighbors[word][1].append(next)
             except KeyError:
-                neighbors[word] = [[prev], [next]]
+                neighbors[word] = ([prev], [next])
                 
             prev = word
                 
