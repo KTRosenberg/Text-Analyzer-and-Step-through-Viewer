@@ -4,6 +4,8 @@ import sys
 import os
 import time
 
+import random
+
 from abc import ABCMeta, abstractmethod
 
 """
@@ -583,7 +585,9 @@ def calc_word_analysis(text_file,
                                  "you'd":["you", "would"],
                                  "you'll":["you", "will"],
                                  "you're":["you", "are"]
-                       }):
+                       },
+                       save_sequence=False
+                       ):
     """
     calculates word frequencies given a text string,
     can find additional (optional) information, ignore trivial words,
@@ -598,6 +602,9 @@ def calc_word_analysis(text_file,
         dictionary, eq_words (dictionary of words to consider as 
             other words or combinations of words)
             NOTE: Currently unused
+        boolean, save_sequence (whether to save a list of references to 
+                                all words, duplicates included, 
+                                in the order they are seen in the input text)
     return: 
         dictionary analysis_dict[string:[...]]
         (of word_analysis dictionary and optional dictionaries)
@@ -630,17 +637,21 @@ def calc_word_analysis(text_file,
                                ]
 
             UNUSED/UNCALCULATED (May reuse later):    
-                word_analysis[4]:
-                    list of int (interpret the entire text as a single 
-                    string with indices 0-length_of_text-1,
-                    this list stores the index of the first character of 
-                    the given word for each instance of the word)
+            word_analysis[4]:
+                list of int (interpret the entire text as a single 
+                string with indices 0-length_of_text-1,
+                this list stores the index of the first character of 
+                the given word for each instance of the word)
         
             list[int] text_as_lines (access with analysis_dict["text as lines"])
                 the entire input text divided into lines,
                 where line i is stored in text_as_lines[i-1]
             list[string] word list (access with analysis_dict["word list"])
                 access list of words with analysis_dict[1]
+            list[string] (the sequence of words, duplicates included, that
+                          appear in the input text, access with
+                          analysis_dict["word sequence"])
+            int, number of words (access with analysis_dict["total words"])
 
             Temporarily removed / work-in-progress options 
             (NOTE: will redo outside function):
@@ -666,6 +677,12 @@ def calc_word_analysis(text_file,
     word_analysis = {}
     # word list
     word_list = []
+    
+    if save_sequence:
+        # word sequence (duplicates allowed)
+        word_seq = []
+        # save reference to word_seq.append
+        word_seq_append_ = word_seq.append
 
     # dictionary of gender word counts (-1 counts if unused)
     # gender_stat = {'m':-1, 'f':-1}
@@ -821,7 +838,7 @@ def calc_word_analysis(text_file,
                     # a new word has been completed, increment the word counter
                     word_i += 1
                     # saved the characters in new_word as a joined_word
-                    joined_word = ''.join(new_word)
+                    joined_word = sys.intern(''.join(new_word))
             
                     # if the new word has not been added to the dictionary
                     # and the word is alphabetical,
@@ -864,7 +881,6 @@ def calc_word_analysis(text_file,
 
                         # add new word to word list
                         word_list_append_(joined_word)
-            
                     # else if the new word has already been 
                     # added to the dictionary,
                     # increment the frequency count
@@ -891,7 +907,8 @@ def calc_word_analysis(text_file,
                         # append the starting position/index of the
                         # current word instance with respect to the whole text
                         # word_data[ICHARINTEXT].append(pos_in_text)
-
+                    if save_sequence:
+                        word_seq_append_(joined_word)
                 # reset the word string
                 del new_word[:]
         # try to read the next line
@@ -905,7 +922,7 @@ def calc_word_analysis(text_file,
         # a new word has been completed, increment the word counter
         word_i += 1
         # saved the characters in new_word as a joined_word
-        joined_word = ''.join(new_word)
+        joined_word = sys.intern(''.join(new_word))
 
         # if the new word has not been added to the dictionary 
         # and the word is alphabetical,
@@ -967,6 +984,9 @@ def calc_word_analysis(text_file,
             # append the starting position/index of the current word instance
             # with respect to the current line
             word_data[ITH_CHAR_ON_LINE].append(pos_on_line)
+        if save_sequence:
+            word_seq_append_(joined_word)
+
 
 
     # if the text does not end with a new-line character
@@ -1111,6 +1131,13 @@ def calc_word_analysis(text_file,
     analysis_dict["text as lines"] = text_as_lines
     # word list
     analysis_dict["word list"] = word_list
+    if not save_sequence:
+        word_seq = []
+    # all words in sequence
+    analysis_dict["word sequence"] = word_seq
+        
+    # number of words in text
+    analysis_dict["total words"] = word_i
     
     # gender statistics
     # analysis_dict["gender stat"] = gender_stat
@@ -1631,19 +1658,123 @@ class WordDistCalc(WordInfo):
                 l = len(word_pos_i)
                 dists[word] = [word_pos_i[i] - word_pos_i[i-1] - 1
                                for i in range(1, l)]
-                               
         return dists
         
-def test_info_classes(analysis_dict):
+class WordNeighbors(WordInfo):
     """
-    TESTING WordInfo CLASS
+    creates a dictionary that, for each word, stores a list
+    of words that appeared one position 
+    before, and another list of words that appeared one position after
+    the same dictionary can be combined with information from across
+    multiple texts
+    """
+    def __init__(self, neighbors=None):
+        """
+        sets the class key, 
+        stores the neighbors dictionary for later population or update
+    
+        param (opt.):
+            dictionary[string][int][string], neighbors 
+                (maps a word to two lists: 
+                one for a list of words one position before,
+                and another for a list of words that appear one position after)
+        """
+        self.key = "word neighbors"
+        self.neighbors = neighbors
+        
+    def calculate(self, analysis_dict):
+        """
+        builds or updates the neighbors dictionary for previous and next
+        word lists per word
+    
+        param:
+            dictionary analysis_dict (created from the text)
+            int length (of desired words)
+        return:
+            dictionary[string][int][string] neighboring words graph
+         
+        """
+        if analysis_dict is None:
+            return None
+        if self.neighbors is None:
+            neighbors = {}
+        else:
+            neighbors = self.neighbors
+            
+        word_seq = analysis_dict["word sequence"]
+        length = len(word_seq)
+        prev = None
+        next = None
+        for i in range(length):
+            word = word_seq[i]
+            try:
+                next = word_seq[i+1]
+            except IndexError:
+                next = None
+                
+            try:
+                neighbors[word][0].append(prev)
+                neighbors[word][1].append(next)
+            except KeyError:
+                neighbors[word] = [[prev], [next]]
+                
+            prev = word
+                
+        return neighbors
+
+def get_message_itr_naive(word_neighbors, thresh):
+    """
+    creates a generator for a message created by traversing
+    random neighboring words in the word neighbors graph
+    (naive testing)
+    
+    param:
+        list[string], word_list (list of unique words in the current text)
+        int, thresh (number of words to generate for the sequence)
+    yield:
+        string, next word in the generates sequence
+    """
+    selector = random.SystemRandom()
+    
+    key = selector.choice(list(word_neighbors.keys()))
+    for i in range(thresh):
+        if key is None:
+            return
+        else:
+            yield key
+            
+        next_neighbors = word_neighbors[key][1]
+        key = selector.choice(next_neighbors)
+    
+    
+def test_info_classes(analysis_dict, word_graph=None):
+    """
+    TESTING WordInfo command objects
     """
     output_dict = {}
     # calculate_word_info(analysis_dict, output_dict, 
                         # set([LongestInfo(), LenXInfo(1)]))
-    calculate_word_info(analysis_dict, output_dict,
-                        set([WordDistCalc(["be"])]))
-    print(output_dict)
+    # calculate_word_info(analysis_dict, output_dict,
+                        # set([WordDistCalc(["be"])]))
+                        
+    if word_graph is None:
+        calculate_word_info(analysis_dict, output_dict,
+                            set([WordNeighbors()]))
+    else:
+        calculate_word_info(analysis_dict, output_dict,
+                            set([WordNeighbors(neighbors=word_graph)]))
+                            
+                            
+    word_neighbors = output_dict["word neighbors"]
+    
+    # total_words = analysis_dict["total words"]
+    
+    gen = get_message_itr_naive(word_neighbors, 10)
+    
+    for word in gen:
+        print(word, end=" \n")
+        
+    print(len(word_neighbors))
     
     
 """
@@ -1675,6 +1806,10 @@ def main():
     add_file_info_from_file(file_info_cache)
     
     choose_file = True
+    
+    # testing:
+    # word_graph = {}
+    
     while choose_file:
         success = True
         try:
@@ -1686,10 +1821,10 @@ def main():
                 
             # call calc_word_analysis(),
             # save the analysis dict that it returns
-            analysis_dict = calc_word_analysis(text_file)
+            analysis_dict = calc_word_analysis(text_file, save_sequence=True)
         except Exception as e:
             print("ERROR: cannot read file")
-            # print(e)
+            print(e)
             success = False
         finally:
             if text_file is None:
@@ -1699,7 +1834,7 @@ def main():
                 
         if success:
             
-            # test_info_classes(analysis_dict)
+            # test_info_classes(analysis_dict, word_graph=word_graph)
             
             print("////TEXT STEP VIEWER////\n")
             
@@ -1731,81 +1866,7 @@ def main():
                 else:
                     print("Error: word cannot be found\n")
     sys.exit("Goodbye!") 
-
-
-    """
-    OUTPUT DISPLAY (TO-REDO/RE-WRITE)
-    """
     
-    """
-    if len(analysis_dict["word list"]) == 0:
-        print("No words\n")
-        sys.exit(0)
-    
-    print("////All Words in List////\n\n")
-    all_words = analysis_dict["word list"]
-    # track the longest word
-    w_longest = []
-    len_longest = 0
-    for w in all_words:
-        if len(w) > len_longest:
-            del w_longest[:]
-            w_longest.append(w)
-            len_longest = len(w)
-        elif len(w) == len_longest:
-            w_longest.append(w)
-        print(w)
-    print('\n\n')
-
-    
-    
-    print("////All Word Counts////\n\n")
-
-    word_analysis = analysis_dict["word analysis"]
-    count = 0
-    line_number = 0
-    format_start = '{:<' + str(len_longest) + '} {:>'
-    # format words and counts nicely
-    for word in sorted(word_analysis.keys()):
-        count = word_analysis[word][WORD_COUNT]
-
-        print(str( format_start + str(len(str(count))) + '}').format(word, count))
-        
-    print("\nNumber of unique words found: " + str(len(all_words)) + '\n')
-    if len(w_longest) > 1:
-        print("Longest words: ",w_longest, " character length:",str(len_longest), "\n\n")
-    else:
-        print("Longest word: ",w_longest[0], " character length:",str(len_longest), "\n\n")
-    
-    print("-------------------------------------------------------------------------------")
-
-    if choices_list[3] > 0:
-        print("////Gender Information////\n\n")
-        gender_stat = analysis_dict["gender stat"]
-    
-        print("number of words identified as masculine: " 
-              + str(gender_stat['m']) + '\n')
-        print("percent of text identified as masculine: " + str(gender_stat['%_m']) + '\n')
-        print("number of words identified as feminine: " + str(gender_stat['f']) + '\n')
-        print("percent of text identified as feminine:  " + str(gender_stat['%_f']) + '\n')
-        print("percent of text identified as either masculine or feminine: " + str(gender_stat['%_indentifiable']) + '\n\n')
-
-    if choices_list[4] > 0:
-        print("////Mood Information////\n\n")
-        mood_stat = analysis_dict["mood stat"]
-
-        print("number of words identified as happy: " + str(mood_stat[':D']) + '\n')
-        print("percent of text identified as happy: " + str(mood_stat['%_:D']) + '\n')
-        print("number of words identified as sad:   " + str(mood_stat['D:']) + '\n')
-        print("percent of text identified as sad:   " + str(mood_stat['%_D:']) + '\n')
-        print("percent of text identified as either happy or sad: " + str(mood_stat['%_indentifiable']) + '\n\n')
-    
-    
-    # step through the text and between instances of a chosen word that appears in the text
-    # (currently only with a cleaned text)
-    if choices_list[0] == 1:
-        pass
-    """
     
 # starting point
 if __name__ == "__main__":
