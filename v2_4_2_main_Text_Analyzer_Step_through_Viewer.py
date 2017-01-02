@@ -1703,22 +1703,22 @@ class WordNeighbors(WordInfo):
             
         word_seq = analysis_dict["word sequence"]
         length = len(word_seq)
-        prev = None
-        next = None
+        prv = None
+        nxt = None
         for i in range(length):
             word = word_seq[i]
             try:
-                next = word_seq[i+1]
+                nxt = word_seq[i+1]
             except IndexError:
-                next = None
+                nxt = None
                 
             try:
-                neighbors[word][0].append(prev)
+                neighbors[word][0].append(prv)
                 neighbors[word][1].append(next)
             except KeyError:
-                neighbors[word] = ([prev], [next])
+                neighbors[word] = ([prv], [nxt])
                 
-            prev = word
+            prv = word
                 
         return neighbors
 
