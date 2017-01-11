@@ -1247,9 +1247,9 @@ def get_num_file_info_args():
         0 if no args
     """
     length = len(sys.argv)-1
-    correct_num = length%2 == 0
-    if correct_num:
-        return (length)
+     
+    if length%2 == 0:
+        return length
     else:
         return -1
         
@@ -1298,7 +1298,35 @@ def add_command_line_arg_file_info(file_info_cache):
                                       (os.path.abspath(args[i]), args[i+1])):
             print("Failed to add " + str(os.path.basename(args[i])))
     return True
+
+"""
+def add_command_line_arg_file_info(file_info_cache, str_of_reserved):
+    if file_info_cache is None or str_of_reserved is None:
+        return False
     
+    is_file_name = True
+    file_name = ''
+    arg = []
+    arg_append_ = arg.append
+    length = len(str_of_reserved)
+    i = 0
+    for c in str_of_reserved:
+        if char == ' ' or i == length-1:
+            if is_file_name:
+                file_name = ''.join(arg)
+                is_file_name = False
+            else:
+                if not add_absolute_file_info(file_info_cache, 
+                                  (os.path.abspath(file_name), ''.join(arg))):
+                    print("Failed to add " + str(os.path.basename(file_name)))
+                is_file_name = True
+                del arg[:]
+        else:
+            arg_append_(c)
+        i +=1
+    return True
+    
+"""
     
 def add_absolute_file_info(file_info_cache, file_info):
     """
@@ -1812,6 +1840,7 @@ def main():
     
     while choose_file:
         success = True
+        text_file = None
         try:
             # file selection
             text_file = select_text_file(file_info_cache)
